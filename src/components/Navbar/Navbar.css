@@ -1,0 +1,140 @@
+/* Navbar Container */
+.navbar-container {
+    background-color: #2a3eb1;
+    padding: 10px 30px;
+    /* Adjust padding for a modern look */
+    height: 60px;
+    /* Adjust navbar height */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Slight shadow for depth */
+    overflow: hidden;
+    /* Prevent scrolling */
+    position: fixed;
+    /* Keep navbar at the top */
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+/* Logo Styling */
+.navbar-logo {
+    font-size: 22px;
+    /* Logo size */
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    /* Center the logo */
+}
+
+.navbar-logo:hover {
+    color: #ffdd57;
+    /* Hover effect */
+}
+
+/* Left Section - Home & Editor Links */
+.navbar-links {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    left: 30px;
+    /* Position the buttons to the left */
+}
+
+.navbar-button {
+    color: #fff;
+    font-size: 14px;
+    margin-right: 20px;
+    padding: 8px 16px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.navbar-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffdd57;
+    /* Hover color */
+}
+
+/* Right Section - Theme Switcher */
+.navbar-theme-switcher {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    right: 30px;
+    /* Position the theme icons to the right */
+}
+
+/* Theme Switcher Icons */
+.navbar-icon {
+    font-size: 22px;
+    margin-left: 15px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+/* Hamburger Menu (For Mobile) */
+.navbar-hamburger {
+    display: none;
+}
+
+.navbar-hamburger.active div {
+    background-color: #fff;
+}
+
+.navbar-hamburger div {
+    width: 25px;
+    height: 3px;
+    background-color: #fff;
+    margin: 4px 0;
+    transition: all 0.3s ease;
+}
+
+/* Mobile View: Hide navbar elements and show hamburger */
+@media (max-width: 768px) {
+    .navbar-container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .navbar-logo {
+        position: static;
+        transform: none;
+        margin: 10px 0;
+    }
+
+    .navbar-links {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-top: 10px;
+    }
+
+    .navbar-button {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+
+    .navbar-theme-switcher {
+        display: none;
+    }
+
+    .navbar-hamburger {
+        display: block;
+        position: absolute;
+        right: 30px;
+        top: 15px;
+        cursor: pointer;
+    }
+}
