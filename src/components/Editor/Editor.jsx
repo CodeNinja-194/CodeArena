@@ -83,34 +83,60 @@ function Editor() {
     setFiles(updatedFiles);
   };
 
-  const updateLanguage = (newLang) => {
-    const updatedFiles = [...files];
-    updatedFiles[activeTab].lang = newLang;
-    updatedFiles[activeTab].code =
-      newLang === "python3"
-        ? `print("Welcome to Codetantra")`
-        : newLang === "java"
-        ? `import java.util.*;
-        class Main {
+//   const updateLanguage = (newLang) => {
+//     const updatedFiles = [...files];
+//     updatedFiles[activeTab].lang = newLang;
+//     updatedFiles[activeTab].code =
+//       newLang === "python3"
+//         ? `print("Welcome to Codetantra")`
+//         : newLang === "java"
+//         ? `import java.util.*;
+//         class Main {
+//     public static void main(String[] args) {
+//         System.out.println("Welcome to Codetantra");
+//     }
+// }`
+//         : newLang === "cpp"
+//         ? `#include <iostream>
+// using namespace std;
+// int main() {
+//     cout << "Welcome to Codetantra";
+//     return 0;
+// }`
+//         : `#include <stdio.h>
+// int main() {
+//     printf("Welcome to Codetantra");
+//     return 0;
+// }`;
+//     setFiles(updatedFiles);
+//   };
+const updateLanguage = (newLang) => {
+  const updatedFiles = [...files];
+  updatedFiles[activeTab].lang = newLang;
+  updatedFiles[activeTab].code =
+    newLang === "python3"
+      ? `print("Welcome to Codetantra")`
+      : newLang === "java"
+      ? `import java.util.*;
+class Main {
     public static void main(String[] args) {
         System.out.println("Welcome to Codetantra");
     }
 }`
-        : newLang === "cpp"
-        ? `#include <iostream>
+      : newLang === "cpp"
+      ? `#include <iostream>
 using namespace std;
 int main() {
     cout << "Welcome to Codetantra";
     return 0;
 }`
-        : `#include <stdio.h>
+      : `#include <stdio.h>
 int main() {
     printf("Welcome to Codetantra");
     return 0;
 }`;
-    setFiles(updatedFiles);
-  };
-
+  setFiles(updatedFiles);
+};
   const createRequest = async () => {
     try {
       setExecuting(true);
