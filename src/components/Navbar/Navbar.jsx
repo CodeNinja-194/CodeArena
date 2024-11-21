@@ -3,7 +3,7 @@ import { AppBar, Box, Button, Container, Typography } from "@mui/material";
 import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CustomContext } from "../../utils/customContext";
-import { blueTheme, greenTheme, orangeTheme, yellowTheme } from "../../utils/cutomTheme";
+import { greenTheme, orangeTheme, yellowTheme } from "../../utils/cutomTheme";
 import "./Navbar.css";
 
 function Navbar() {
@@ -16,8 +16,6 @@ function Navbar() {
   // Function to get the circle color based on the current theme
   const getCircleColor = (themeColor) => {
     switch (themeColor) {
-      case blueTheme:
-        return "#42a5f5"; // Blue
       case greenTheme:
         return "#66bb6a"; // Green
       case orangeTheme:
@@ -30,64 +28,87 @@ function Navbar() {
   };
 
   return (
-    <AppBar position="static" className="navbar-container">
-      <Container className="navbar-content" maxWidth="xl">
+    <AppBar
+      position="static"
+      sx={{
+        backgroundColor: "#f9f9f9", // Light background color
+        boxShadow: "none",
+        height: "48px", // Make Navbar thinner
+        justifyContent: "center",
+      }}
+    >
+      <Container
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "0 1rem",
+        }}
+      >
+        {/* Logo */}
         <Typography
           variant="h6"
           noWrap
           component="a"
           href="/"
-          className="navbar-logo"
+          sx={{
+            fontSize: "1.25rem",
+            fontWeight: "bold",
+            color: "#333",
+            textDecoration: "none",
+          }}
         >
           CodeArena
         </Typography>
 
-        {/* Left Section - Home & Editor Links */}
-        <Box className="navbar-links">
+        {/* Links */}
+        <Box sx={{ display: "flex", gap: "1rem" }}>
           <Button
             onClick={() => navigate("/")}
-            className="navbar-button"
+            sx={{
+              color: "#333",
+              textTransform: "none",
+              fontWeight: "500",
+            }}
           >
             Home
           </Button>
           <Button
             onClick={() => navigate("/editor")}
-            className="navbar-button"
+            sx={{
+              color: "#333",
+              textTransform: "none",
+              fontWeight: "500",
+            }}
           >
             Editor
           </Button>
         </Box>
 
-        {/* Right Section - Theme Switcher */}
-        <Box className="navbar-theme-switcher">
+        {/* Theme Switcher */}
+        <Box sx={{ display: "flex", gap: "0.5rem" }}>
           <CircleIcon
             onClick={() => setTheme(orangeTheme)}
-            className="navbar-icon"
-            style={{ color: getCircleColor(orangeTheme) }}
+            sx={{
+              color: getCircleColor(orangeTheme),
+              cursor: "pointer",
+            }}
           />
           <CircleIcon
             onClick={() => setTheme(greenTheme)}
-            className="navbar-icon"
-            style={{ color: getCircleColor(greenTheme) }}
-          />
-          <CircleIcon
-            onClick={() => setTheme(blueTheme)}
-            className="navbar-icon"
-            style={{ color: getCircleColor(blueTheme) }}
+            sx={{
+              color: getCircleColor(greenTheme),
+              cursor: "pointer",
+            }}
           />
           <CircleIcon
             onClick={() => setTheme(yellowTheme)}
-            className="navbar-icon"
-            style={{ color: getCircleColor(yellowTheme) }}
+            sx={{
+              color: getCircleColor(yellowTheme),
+              cursor: "pointer",
+            }}
           />
         </Box>
-
-        {/* Hamburger Menu for Mobile */}
-        <div className={`navbar-hamburger ${isMenuOpen ? "active" : ""}`} onClick={toggleMenu}>
-          <div></div>
-          <div></div>
-          <div></div>
-        </div>
       </Container>
     </AppBar>
   );
