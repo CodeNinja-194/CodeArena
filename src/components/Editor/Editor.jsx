@@ -1,4 +1,3 @@
-import EditIcon from "@mui/icons-material/Edit"; // Import Edit Icon
 import DownloadIcon from "@mui/icons-material/CloudDownload";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -16,12 +15,6 @@ import {
   Tabs,
   InputLabel,
   useTheme,
-  IconButton, // Import IconButton
-  Dialog, // For rename dialog
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  TextField as MuiTextField, // For dialog input field
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import AceEditor from "react-ace";
@@ -36,12 +29,10 @@ import "ace-builds/src-noconflict/theme-chrome"; // Light theme for Ace Editor
 function Editor() {
   const [activeTab, setActiveTab] = useState(0);
   const [files, setFiles] = useState([
-    { lang: "python3", code: `print("Welcome to Codetantra")`, output: "", name: "File 1" },
+    { lang: "python3", code: `print("Welcome to Codetantra")`, output: "" },
   ]);
   const [input, setInput] = useState("");
   const [executing, setExecuting] = useState(false);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [newFileName, setNewFileName] = useState("");
 
   const theme = useTheme();
   const isDarkTheme = theme.palette.mode === "dark";
@@ -66,7 +57,7 @@ function Editor() {
   };
 
   const handleAddFile = () => {
-    const newFile = { lang: "python3", code: `print("Welcome to Codetantra")`, output: "", name: `File ${files.length + 1}` };
+    const newFile = { lang: "python3", code: `print("Welcome to Codetantra")`, output: "" };
     setFiles([...files, newFile]);
     setActiveTab(files.length);
     setInput("");
@@ -162,13 +153,6 @@ int main() {
     saveAs(blob, `code.${languageArrayExtension[currentFile.lang]}`);
   };
 
-  const handleRenameFile = () => {
-    const updatedFiles = [...files];
-    updatedFiles[activeTab].name = newFileName;
-    setFiles(updatedFiles);
-    setOpenDialog(false);
-  };
-
   // Add the shortcut listener for 'Ctrl + Enter' or 'Cmd + Enter'
   useEffect(() => {
     const handleKeyPress = (event) => {
@@ -205,21 +189,7 @@ int main() {
         {files.map((file, index) => (
           <Tab
             key={index}
-            label={
-              <>
-                {file.name}
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    setNewFileName(file.name);
-                    setOpenDialog(true);
-                  }}
-                  sx={{ marginLeft: 1 }}
-                >
-                  <EditIcon />
-                </IconButton>
-              </>
-            }
+            label={`File ${index + 1}`}
             onDoubleClick={() => handleDeleteFile(index)}
           />
         ))}
@@ -227,24 +197,6 @@ int main() {
           +
         </Button>
       </Tabs>
-
-      {/* Dialog for renaming the file */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Rename File</DialogTitle>
-        <DialogContent>
-          <MuiTextField
-            autoFocus
-            fullWidth
-            value={newFileName}
-            onChange={(e) => setNewFileName(e.target.value)}
-            label="File Name"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-          <Button onClick={handleRenameFile}>Rename</Button>
-        </DialogActions>
-      </Dialog>
 
       <Box sx={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: 2 }}>
         <AceEditor
