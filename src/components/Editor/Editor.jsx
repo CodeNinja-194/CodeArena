@@ -233,7 +233,12 @@ int main() {
               startIcon={<PlayArrowRoundedIcon />}
               disabled={executing}
               size="small"
-              sx={{ backgroundColor: buttonBackground }}
+              sx={{
+                backgroundColor: "#4caf50", // Green background for 'Run'
+                "&:hover": {
+                  backgroundColor: "#388e3c", // Darker green on hover
+                },
+              }}
             >
               Run
             </Button>
@@ -242,7 +247,12 @@ int main() {
               onClick={handleClear}
               startIcon={<RefreshIcon />}
               size="small"
-              sx={{ backgroundColor: buttonBackground }}
+              sx={{
+                backgroundColor: "#ff9800", // Orange background for 'Clear'
+                "&:hover": {
+                  backgroundColor: "#f57c00", // Darker orange on hover
+                },
+              }}
             >
               Clear
             </Button>
@@ -251,7 +261,12 @@ int main() {
               onClick={handleDownloadCode}
               startIcon={<DownloadIcon />}
               size="small"
-              sx={{ backgroundColor: buttonBackground }}
+              sx={{
+                backgroundColor: "#2196f3", // Blue background for 'Download'
+                "&:hover": {
+                  backgroundColor: "#1976d2", // Darker blue on hover
+                },
+              }}
             >
               Download
             </Button>
