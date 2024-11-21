@@ -6,12 +6,13 @@ import {
   Button,
   FormControl,
   FormControlLabel,
+  FormLabel,
   LinearProgress,
   Radio,
   RadioGroup,
+  TextField,
   Tab,
   Tabs,
-  TextField,
   InputLabel,
   useTheme,
 } from "@mui/material";
@@ -34,14 +35,13 @@ function Editor() {
   const [output, setOutput] = useState("");
   const [executing, setExecuting] = useState(false);
 
-  const theme = useTheme(); // Material-UI theme
+  const theme = useTheme();
   const isDarkTheme = theme.palette.mode === "dark";
 
-  // Colors based on the theme
   const editorBackgroundColor = isDarkTheme ? "#f5f5f5" : "#ffffff";
-  const textColor = "#333"; // Uniform text color for light themes
+  const textColor = "#333"; // Uniform text color
   const inputOutputBackground = "#ffffff"; // White background for non-editor fields
-  const inputOutputBorder = "#ccc"; // Subtle border for input/output
+  const buttonBackground = "#f0f0f0"; // Subtle background for buttons
 
   const languageMap = {
     cpp: "c_cpp",
@@ -156,8 +156,10 @@ int main() {
     <Box
       sx={{
         height: "100vh",
+        backgroundColor: inputOutputBackground,
         display: "grid",
         gridTemplateRows: "auto 1fr",
+        overflow: "hidden",
       }}
     >
       <Tabs
@@ -203,7 +205,11 @@ int main() {
           }}
         >
           <FormControl component="fieldset">
+            <FormLabel component="legend" sx={{ color: textColor }}>
+              Language
+            </FormLabel>
             <RadioGroup
+              row
               value={currentFile.lang}
               onChange={(e) => updateLanguage(e.target.value)}
             >
@@ -214,31 +220,42 @@ int main() {
             </RadioGroup>
           </FormControl>
 
-          <Button
-            variant="contained"
-            size="small"
-            onClick={createRequest}
-            startIcon={<PlayArrowRoundedIcon />}
-            disabled={executing}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 1,
+            }}
           >
-            Run
-          </Button>
-          <Button
-            variant="contained"
-            size="small"
-            onClick={handleClear}
-            startIcon={<RefreshIcon />}
-          >
-            Clear
-          </Button>
-          <Button
-            variant="contained"
-            size="small"
-            onClick={handleDownloadCode}
-            startIcon={<DownloadIcon />}
-          >
-            Download
-          </Button>
+            <Button
+              variant="contained"
+              onClick={createRequest}
+              startIcon={<PlayArrowRoundedIcon />}
+              disabled={executing}
+              size="small"
+              sx={{ backgroundColor: buttonBackground }}
+            >
+              Run
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleClear}
+              startIcon={<RefreshIcon />}
+              size="small"
+              sx={{ backgroundColor: buttonBackground }}
+            >
+              Clear
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleDownloadCode}
+              startIcon={<DownloadIcon />}
+              size="small"
+              sx={{ backgroundColor: buttonBackground }}
+            >
+              Download
+            </Button>
+          </Box>
 
           {executing && <LinearProgress />}
 
@@ -253,7 +270,7 @@ int main() {
               backgroundColor: inputOutputBackground,
               color: textColor,
               borderRadius: 1,
-              border: `1px solid ${inputOutputBorder}`,
+              border: `1px solid #ccc`,
             }}
           />
 
@@ -266,7 +283,7 @@ int main() {
               overflowY: "auto",
               whiteSpace: "pre-line",
               borderRadius: 1,
-              border: `1px solid ${inputOutputBorder}`,
+              border: `1px solid #ccc`,
               height: "30%",
             }}
           >
