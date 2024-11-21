@@ -1,29 +1,30 @@
 import CircleIcon from "@mui/icons-material/Circle";
-import { AppBar, Box, Button, Container, Typography } from "@mui/material";
+import Brightness4Icon from "@mui/icons-material/Brightness4"; // Dark mode icon
+import Brightness7Icon from "@mui/icons-material/Brightness7"; // Light mode icon
+import { AppBar, Box, Button, Container, IconButton, Typography } from "@mui/material";
 import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CustomContext } from "../../utils/customContext";
-import { greenTheme, orangeTheme, yellowTheme } from "../../utils/cutomTheme";
+import { greenTheme,yellowTheme } from "../../utils/cutomTheme";
 import "./Navbar.css";
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const { theme, setTheme } = useContext(CustomContext);
+  const { theme, setTheme, isDarkMode, setIsDarkMode } = useContext(CustomContext);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-  // Function to get the circle color based on the current theme
+  const toggleDarkMode = () => setIsDarkMode(!isDarkMode); // Toggle dark mode state
+
   const getCircleColor = (themeColor) => {
     switch (themeColor) {
       case greenTheme:
-        return "#66bb6a"; // Green
-      case orangeTheme:
-        return "#ff7043"; // Orange
+        return "#66bb6a";
       case yellowTheme:
-        return "#ffeb3b"; // Yellow
+        return "#ffeb3b";
       default:
-        return "#fff"; // Default color
+        return "#fff";
     }
   };
 
@@ -31,10 +32,11 @@ function Navbar() {
     <AppBar
       position="static"
       sx={{
-        backgroundColor: "#f9f9f9", // Light background color
+        backgroundColor: isDarkMode ? "#333" : "#f9f9f9", // Dark/Light mode background
         boxShadow: "none",
-        height: "48px", // Make Navbar thinner
+        height: "48px", // Thinner Navbar
         justifyContent: "center",
+        color: isDarkMode ? "#f9f9f9" : "#333", // Adjust text color
       }}
     >
       <Container
@@ -54,7 +56,7 @@ function Navbar() {
           sx={{
             fontSize: "1.25rem",
             fontWeight: "bold",
-            color: "#333",
+            color: isDarkMode ? "#f9f9f9" : "#333",
             textDecoration: "none",
           }}
         >
@@ -66,7 +68,7 @@ function Navbar() {
           <Button
             onClick={() => navigate("/")}
             sx={{
-              color: "#333",
+              color: isDarkMode ? "#f9f9f9" : "#333",
               textTransform: "none",
               fontWeight: "500",
             }}
@@ -76,7 +78,7 @@ function Navbar() {
           <Button
             onClick={() => navigate("/editor")}
             sx={{
-              color: "#333",
+              color: isDarkMode ? "#f9f9f9" : "#333",
               textTransform: "none",
               fontWeight: "500",
             }}
@@ -86,14 +88,8 @@ function Navbar() {
         </Box>
 
         {/* Theme Switcher */}
-        <Box sx={{ display: "flex", gap: "0.5rem" }}>
-          <CircleIcon
-            onClick={() => setTheme(orangeTheme)}
-            sx={{
-              color: getCircleColor(orangeTheme),
-              cursor: "pointer",
-            }}
-          />
+        <Box sx={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+    
           <CircleIcon
             onClick={() => setTheme(greenTheme)}
             sx={{
@@ -108,6 +104,10 @@ function Navbar() {
               cursor: "pointer",
             }}
           />
+          {/* Dark Mode Toggle */}
+          <IconButton onClick={toggleDarkMode} sx={{ color: isDarkMode ? "#f9f9f9" : "#333" }}>
+            {isDarkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+          </IconButton>
         </Box>
       </Container>
     </AppBar>
