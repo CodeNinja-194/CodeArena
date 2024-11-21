@@ -28,9 +28,7 @@ import "ace-builds/src-noconflict/theme-chrome"; // Light theme for Ace Editor
 
 function Editor() {
   const [activeTab, setActiveTab] = useState(0);
-  const [files, setFiles] = useState([
-    { lang: "python3", code: `print("Welcome to Codetantra")`, output: "" },
-  ]);
+  const [files, setFiles] = useState([]);
   const [input, setInput] = useState("");
   const [executing, setExecuting] = useState(false);
 
@@ -50,6 +48,27 @@ function Editor() {
 
   const currentFile = files[activeTab] || {};
   const editorLang = languageMap[currentFile.lang] || "python";
+
+  // Load the state from localStorage on mount
+  useEffect(() => {
+    const savedFiles = localStorage.getItem("files");
+    const savedInput = localStorage.getItem("input");
+    if (savedFiles) {
+      setFiles(JSON.parse(savedFiles));
+    } else {
+      // Default file
+      setFiles([{ lang: "python3", code: `print("Welcome to Codetantra")`, output: "" }]);
+    }
+    if (savedInput) {
+      setInput(savedInput);
+    }
+  }, []);
+
+  // Save the state to localStorage whenever files or input changes
+  useEffect(() => {
+    localStorage.setItem("files", JSON.stringify(files));
+    localStorage.setItem("input", input);
+  }, [files, input]);
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -101,8 +120,7 @@ int main() {
         : `#include <stdio.h>
 int main() {
     printf("Welcome to Codetantra");
-    return 0;
-}`;
+    return 0}`;
     setFiles(updatedFiles);
   };
 
@@ -152,23 +170,6 @@ int main() {
     const blob = new Blob([currentFile.code], { type: "text/plain;charset=utf-8" });
     saveAs(blob, `code.${languageArrayExtension[currentFile.lang]}`);
   };
-
-  // Add the shortcut listener for 'Ctrl + Enter' or 'Cmd + Enter'
-  useEffect(() => {
-    const handleKeyPress = (event) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
-        createRequest(); // Trigger the Run button functionality
-      }
-    };
-
-    // Attach the event listener
-    window.addEventListener("keydown", handleKeyPress);
-
-    // Cleanup the event listener when the component is unmounted
-    return () => {
-      window.removeEventListener("keydown", handleKeyPress);
-    };
-  }, [createRequest]);
 
   return (
     <Box
