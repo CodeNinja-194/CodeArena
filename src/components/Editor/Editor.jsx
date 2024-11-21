@@ -16,7 +16,7 @@ import {
   InputLabel,
   useTheme,
 } from "@mui/material";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AceEditor from "react-ace";
 import { saveAs } from "file-saver";
 
@@ -151,6 +151,23 @@ int main() {
     const blob = new Blob([currentFile.code], { type: "text/plain;charset=utf-8" });
     saveAs(blob, `code.${languageArrayExtension[currentFile.lang]}`);
   };
+
+  // Add the shortcut listener for 'Ctrl + Enter' or 'Cmd + Enter'
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+        createRequest(); // Trigger the Run button functionality
+      }
+    };
+
+    // Attach the event listener
+    window.addEventListener("keydown", handleKeyPress);
+
+    // Cleanup the event listener when the component is unmounted
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [createRequest]); // The effect depends on createRequest
 
   return (
     <Box
