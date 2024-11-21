@@ -1,4 +1,4 @@
-import EditIcon from "@mui/icons-material/Edit"; // Import the Edit icon
+import EditIcon from "@mui/icons-material/Edit"; // Import Edit Icon
 import DownloadIcon from "@mui/icons-material/CloudDownload";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -15,12 +15,18 @@ import {
   Tab,
   Tabs,
   InputLabel,
-  IconButton,
   useTheme,
+  IconButton, // Import IconButton
+  Dialog, // For rename dialog
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField as MuiTextField, // For dialog input field
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import AceEditor from "react-ace";
 import { saveAs } from "file-saver";
+
 import "ace-builds/src-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/mode-c_cpp";
 import "ace-builds/src-noconflict/mode-java";
@@ -34,8 +40,8 @@ function Editor() {
   ]);
   const [input, setInput] = useState("");
   const [executing, setExecuting] = useState(false);
-  const [isEditing, setIsEditing] = useState(null); // Track which file is being edited
-  const [newFileName, setNewFileName] = useState(""); // Track the new file name
+  const [openDialog, setOpenDialog] = useState(false);
+  const [newFileName, setNewFileName] = useState("");
 
   const theme = useTheme();
   const isDarkTheme = theme.palette.mode === "dark";
@@ -73,18 +79,6 @@ function Editor() {
       setActiveTab(Math.max(0, activeTab - 1));
       setInput("");
     }
-  };
-
-  const handleRenameFile = (index) => {
-    setIsEditing(index);
-    setNewFileName(files[index].name);
-  };
-
-  const handleSaveFileName = (index) => {
-    const updatedFiles = [...files];
-    updatedFiles[index].name = newFileName;
-    setFiles(updatedFiles);
-    setIsEditing(null);
   };
 
   const updateCode = (newCode) => {
@@ -168,6 +162,13 @@ int main() {
     saveAs(blob, `code.${languageArrayExtension[currentFile.lang]}`);
   };
 
+  const handleRenameFile = () => {
+    const updatedFiles = [...files];
+    updatedFiles[activeTab].name = newFileName;
+    setFiles(updatedFiles);
+    setOpenDialog(false);
+  };
+
   // Add the shortcut listener for 'Ctrl + Enter' or 'Cmd + Enter'
   useEffect(() => {
     const handleKeyPress = (event) => {
@@ -205,21 +206,19 @@ int main() {
           <Tab
             key={index}
             label={
-              isEditing === index ? (
-                <TextField
-                  value={newFileName}
-                  onChange={(e) => setNewFileName(e.target.value)}
-                  onBlur={() => handleSaveFileName(index)}
-                  autoFocus
-                />
-              ) : (
-                <>
-                  {file.name}
-                  <IconButton size="small" onClick={() => handleRenameFile(index)}>
-                    <EditIcon />
-                  </IconButton>
-                </>
-              )
+              <>
+                {file.name}
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    setNewFileName(file.name);
+                    setOpenDialog(true);
+                  }}
+                  sx={{ marginLeft: 1 }}
+                >
+                  <EditIcon />
+                </IconButton>
+              </>
             }
             onDoubleClick={() => handleDeleteFile(index)}
           />
@@ -228,6 +227,24 @@ int main() {
           +
         </Button>
       </Tabs>
+
+      {/* Dialog for renaming the file */}
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>Rename File</DialogTitle>
+        <DialogContent>
+          <MuiTextField
+            autoFocus
+            fullWidth
+            value={newFileName}
+            onChange={(e) => setNewFileName(e.target.value)}
+            label="File Name"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+          <Button onClick={handleRenameFile}>Rename</Button>
+        </DialogActions>
+      </Dialog>
 
       <Box sx={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: 2 }}>
         <AceEditor
