@@ -13,7 +13,6 @@ import {
   TextField,
   Tab,
   Tabs,
-  InputLabel,
   useTheme,
 } from "@mui/material";
 import { useState, useEffect } from "react";
@@ -29,12 +28,10 @@ import "ace-builds/src-noconflict/theme-chrome"; // Light theme for Ace Editor
 function Editor() {
   const [activeTab, setActiveTab] = useState(0);
   const [files, setFiles] = useState([
-    { lang: "python3", code: `print("Welcome to Codetantra")`, output: "", name: "python3.py" },
+    { lang: "python3", code: `print("Welcome to Codetantra")`, output: "" },
   ]);
   const [input, setInput] = useState("");
   const [executing, setExecuting] = useState(false);
-  const [editingFileName, setEditingFileName] = useState(null);
-  const [newFileName, setNewFileName] = useState("");
 
   const theme = useTheme();
   const isDarkTheme = theme.palette.mode === "dark";
@@ -50,13 +47,6 @@ function Editor() {
     python3: "python",
   };
 
-  const languageExtension = {
-    python3: "py",
-    cpp: "cpp",
-    java: "java",
-    c: "c",
-  };
-
   const currentFile = files[activeTab] || {};
   const editorLang = languageMap[currentFile.lang] || "python";
 
@@ -66,9 +56,7 @@ function Editor() {
   };
 
   const handleAddFile = () => {
-    const newLang = "python3"; // Default language
-    const newFileName = `${newLang}.${languageExtension[newLang]}`;
-    const newFile = { lang: newLang, code: `print("Welcome to Codetantra")`, output: "", name: newFileName };
+    const newFile = { lang: "python3", code: `print("Welcome to Codetantra")`, output: "" };
     setFiles([...files, newFile]);
     setActiveTab(files.length);
     setInput("");
@@ -113,22 +101,7 @@ int main() {
 int main() {
     printf("Welcome to Codetantra");
     return 0}`;
-    
-    // Renaming the file based on the language
-    updatedFiles[activeTab].name = `${newLang}.${languageExtension[newLang]}`;
     setFiles(updatedFiles);
-  };
-
-  const handleRenameFile = (index) => {
-    setEditingFileName(index);
-    setNewFileName(files[index].name); // Set the current name for editing
-  };
-
-  const saveFileName = (index) => {
-    const updatedFiles = [...files];
-    updatedFiles[index].name = newFileName;
-    setFiles(updatedFiles);
-    setEditingFileName(null);
   };
 
   const createRequest = async () => {
@@ -168,8 +141,14 @@ int main() {
   };
 
   const handleDownloadCode = () => {
+    const languageArrayExtension = {
+      java: "java",
+      python3: "py",
+      cpp: "cpp",
+      c: "c",
+    };
     const blob = new Blob([currentFile.code], { type: "text/plain;charset=utf-8" });
-    saveAs(blob, currentFile.name);
+    saveAs(blob, `code.${languageArrayExtension[currentFile.lang]}`);
   };
 
   const handleKeyDown = (event) => {
@@ -204,24 +183,7 @@ int main() {
         {files.map((file, index) => (
           <Tab
             key={index}
-            label={
-              editingFileName === index ? (
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <TextField
-                    value={newFileName}
-                    onChange={(e) => setNewFileName(e.target.value)}
-                    size="small"
-                    sx={{ width: "100px" }}
-                  />
-                  <Button onClick={() => saveFileName(index)}>Save</Button>
-                </Box>
-              ) : (
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  {file.name}
-                  <Button onClick={() => handleRenameFile(index)}>✏️</Button>
-                </Box>
-              )
-            }
+            label={`File ${index + 1}`}
             onDoubleClick={() => handleDeleteFile(index)}
           />
         ))}
@@ -285,35 +247,35 @@ int main() {
               size="small"
               sx={{
                 backgroundColor: "#4caf50", // Green background for 'Run'
-                "&:hover": {
-                  backgroundColor: "#388e3c", // Darker green on hover
-                },
+                "&:hover": { backgroundColor: "#45a049" },
               }}
             >
               Run
             </Button>
+
             <Button
-              variant="contained"
+              variant="outlined"
               onClick={handleClear}
               startIcon={<RefreshIcon />}
               size="small"
               sx={{
-                backgroundColor: "#ff9800", // Orange background for 'Clear'
-                "&:hover": {
-                  backgroundColor: "#f57c00", // Darker orange on hover
-                },
+                color: "#f44336", // Red color for clear
+                borderColor: "#f44336",
+                "&:hover": { borderColor: "#d32f2f" },
               }}
             >
               Clear
             </Button>
+
             <Button
-              variant="contained"
+              variant="outlined"
               onClick={handleDownloadCode}
               startIcon={<DownloadIcon />}
               size="small"
               sx={{
-                backgroundColor: "#1976d2", // Blue color for download
-                "&:hover": { backgroundColor: "#1565c0" },
+                color: "#1976d2", // Blue color for download
+                borderColor: "#1976d2",
+                "&:hover": { borderColor: "#1565c0" },
               }}
             >
               Download
@@ -321,22 +283,41 @@ int main() {
           </Box>
 
           {executing && <LinearProgress />}
-          
-          {/* Changed Input and Output Fields */}
           <TextField
             label="Input"
             variant="outlined"
+            multiline
+            rows={4}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            sx={{ backgroundColor: "#f5f5f5" }}
+            sx={{
+              flex: 1,
+              borderColor: "#ccc",
+              "& .MuiOutlinedInput-root": {
+                borderColor: "#ccc", // Input field border color
+                "&:hover fieldset": {
+                  borderColor: "#3f51b5", // Blue on hover
+                },
+              },
+            }}
           />
           <TextField
             label="Output"
             variant="outlined"
+            multiline
+            rows={4}
             value={currentFile.output}
             disabled
             sx={{
+              flex: 1,
               backgroundColor: "#f5f5f5",
+              borderColor: "#ccc",
+              "& .MuiOutlinedInput-root": {
+                borderColor: "#ccc", // Output field border color
+                "&:hover fieldset": {
+                  borderColor: "#3f51b5", // Blue on hover
+                },
+              },
             }}
           />
         </Box>
