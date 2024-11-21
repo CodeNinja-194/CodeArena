@@ -32,15 +32,17 @@ function Editor() {
   const [output, setOutput] = useState("");
   const [executing, setExecuting] = useState(false);
 
-  const theme = useTheme(); // Get the current theme
+  const theme = useTheme();
   const isDarkTheme = theme.palette.mode === "dark";
 
   // Colors based on theme
   const editorBackgroundColor = isDarkTheme ? "#1e1e1e" : "#ffffff";
   const textColor = isDarkTheme ? "#333" : "#333";
-  const inputOutputBackground = "#f5f5f5"; // Light white background
-  const inputOutputTextColor = "#000"; // Black text for visibility
-  const dropdownBackground = isDarkTheme ? "#3a3f44" : "#ffffff";
+  const inputOutputBackground = isDarkTheme ? "#f0f0f0" : "#f8f9fa"; // Light background for input/output
+  const inputOutputTextColor = "#000"; // Dark text for better visibility
+  const inputOutputBorderColor = "#ccc"; // Subtle border color
+  const dropdownBackground = "#ffffff"; // Light background for dropdown
+  const dropdownTextColor = "#000"; // Black text for dropdown options
 
   const languageMap = {
     cpp: "c_cpp",
@@ -197,7 +199,7 @@ int main() {
             display: "flex",
             flexDirection: "column",
             gap: 2,
-            backgroundColor: "#f5f5f5", // Light white background for non-editor fields
+            backgroundColor: "#f5f5f5",
             padding: 2,
             borderRadius: 1,
             height: "calc(100vh - 48px)",
@@ -209,8 +211,12 @@ int main() {
             disabled={executing}
             sx={{
               backgroundColor: dropdownBackground,
-              color: textColor,
+              color: dropdownTextColor,
               borderRadius: 1,
+              "& .MuiMenuItem-root": {
+                backgroundColor: dropdownBackground,
+                color: dropdownTextColor,
+              },
             }}
           >
             <MenuItem value="python3">Python</MenuItem>
@@ -240,6 +246,7 @@ int main() {
             sx={{
               backgroundColor: inputOutputBackground,
               color: inputOutputTextColor,
+              border: `1px solid ${inputOutputBorderColor}`,
               borderRadius: 1,
             }}
           />
@@ -251,6 +258,7 @@ int main() {
               color: inputOutputTextColor,
               padding: 2,
               borderRadius: 1,
+              border: `1px solid ${inputOutputBorderColor}`,
               height: "30%",
               overflowY: "auto",
             }}
