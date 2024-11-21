@@ -36,9 +36,10 @@ function Editor() {
   const isDarkTheme = theme.palette.mode === "dark";
 
   // Colors based on theme
-  const editorBackgroundColor = isDarkTheme ? "#272822" : "#f7f7f7";
+  const editorBackgroundColor = isDarkTheme ? "#1e1e1e" : "#ffffff";
   const textColor = isDarkTheme ? "#f8f8f2" : "#333";
-  const inputBackgroundColor = isDarkTheme ? "#3a3f44" : "#ffffff";
+  const inputOutputBackground = isDarkTheme ? "#2d2d2d" : "#f0f0f0";
+  const dropdownBackground = isDarkTheme ? "#3a3f44" : "#ffffff";
 
   const languageMap = {
     cpp: "c_cpp",
@@ -147,7 +148,14 @@ int main() {
 
   return (
     <>
-      <Box sx={{ height: "100vh", display: "grid", gridTemplateRows: "auto 1fr" }}>
+      <Box
+        sx={{
+          height: "100vh",
+          display: "grid",
+          gridTemplateRows: "auto 1fr",
+          overflow: "hidden",
+        }}
+      >
         <Tabs
           value={activeTab}
           onChange={handleTabChange}
@@ -190,11 +198,24 @@ int main() {
             }}
           />
 
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              height: "calc(100vh - 48px)",
+              overflowY: "auto",
+            }}
+          >
             <Select
               value={currentFile.lang}
               onChange={(e) => updateLanguage(e.target.value)}
               disabled={executing}
+              sx={{
+                backgroundColor: dropdownBackground,
+                color: textColor,
+                borderRadius: 1,
+              }}
             >
               <MenuItem value="python3">Python</MenuItem>
               <MenuItem value="c">C</MenuItem>
@@ -222,7 +243,7 @@ int main() {
               rows={5}
               variant="outlined"
               sx={{
-                backgroundColor: inputBackgroundColor,
+                backgroundColor: inputOutputBackground,
                 color: textColor,
                 borderRadius: 1,
               }}
@@ -231,7 +252,7 @@ int main() {
             <InputLabel sx={{ color: textColor }}>Output</InputLabel>
             <Box
               sx={{
-                backgroundColor: inputBackgroundColor,
+                backgroundColor: inputOutputBackground,
                 color: textColor,
                 padding: 2,
                 overflowY: "auto",
