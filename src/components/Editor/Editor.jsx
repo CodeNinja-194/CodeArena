@@ -1,7 +1,6 @@
 import DownloadIcon from "@mui/icons-material/CloudDownload";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import EditIcon from "@mui/icons-material/Edit"; // Edit icon for file name
 import {
   Box,
   Button,
@@ -14,7 +13,7 @@ import {
   TextField,
   Tab,
   Tabs,
-  IconButton,
+  InputLabel,
   useTheme,
 } from "@mui/material";
 import { useState, useEffect } from "react";
@@ -30,7 +29,7 @@ import "ace-builds/src-noconflict/theme-chrome"; // Light theme for Ace Editor
 function Editor() {
   const [activeTab, setActiveTab] = useState(0);
   const [files, setFiles] = useState([
-    { lang: "python3", code: `print("Welcome to Codetantra")`, output: "", name: "python3.py" },
+    { lang: "python3", code: `print("Welcome to Codetantra")`, output: "" },
   ]);
   const [input, setInput] = useState("");
   const [executing, setExecuting] = useState(false);
@@ -54,11 +53,11 @@ function Editor() {
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
-    setInput("");
+    setInput(""); // Reset input field when switching files
   };
 
   const handleAddFile = () => {
-    const newFile = { lang: "python3", code: `print("Welcome to Codetantra")`, output: "", name: "python3.py" };
+    const newFile = { lang: "python3", code: `print("Welcome to Codetantra")`, output: "" };
     setFiles([...files, newFile]);
     setActiveTab(files.length);
     setInput("");
@@ -102,7 +101,8 @@ int main() {
         : `#include <stdio.h>
 int main() {
     printf("Welcome to Codetantra");
-    return 0}`;
+    return 0;
+}`;
     setFiles(updatedFiles);
   };
 
@@ -153,28 +153,22 @@ int main() {
     saveAs(blob, `code.${languageArrayExtension[currentFile.lang]}`);
   };
 
-  const handleKeyDown = (event) => {
-    if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
-      createRequest();
-    }
-  };
-
+  // Add the shortcut listener for 'Ctrl + Enter' or 'Cmd + Enter'
   useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+    const handleKeyPress = (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+        createRequest(); // Trigger the Run button functionality
+      }
     };
-  }, [files, activeTab]);
 
-  // Function to update the file name
-  const handleEditFileName = (index) => {
-    const newFileName = prompt("Enter new file name", files[index].name);
-    if (newFileName) {
-      const updatedFiles = [...files];
-      updatedFiles[index].name = newFileName;
-      setFiles(updatedFiles);
-    }
-  };
+    // Attach the event listener
+    window.addEventListener("keydown", handleKeyPress);
+
+    // Cleanup the event listener when the component is unmounted
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [createRequest]);
 
   return (
     <Box
@@ -191,27 +185,12 @@ int main() {
         onChange={handleTabChange}
         variant="scrollable"
         scrollButtons="auto"
-        sx={{ minHeight: "36px" }} // Reduced height of tabs
       >
         {files.map((file, index) => (
           <Tab
             key={index}
-            label={
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <span style={{ fontSize: "14px" }}>{file.name}</span>
-                <IconButton
-                  size="small"
-                  onClick={() => handleEditFileName(index)} // Edit file name on click
-                >
-                  <EditIcon fontSize="inherit" />
-                </IconButton>
-              </Box>
-            }
+            label={`File ${index + 1}`}
             onDoubleClick={() => handleDeleteFile(index)}
-            sx={{
-              fontSize: "14px", // Reduced font size for file name
-              padding: "4px 8px", // Smaller padding for the tab
-            }}
           />
         ))}
         <Button onClick={handleAddFile} sx={{ minWidth: "2rem", color: "primary.main" }}>
@@ -274,35 +253,37 @@ int main() {
               size="small"
               sx={{
                 backgroundColor: "#4caf50", // Green background for 'Run'
-                "&:hover": { backgroundColor: "#45a049" },
+                "&:hover": {
+                  backgroundColor: "#388e3c", // Darker green on hover
+                },
               }}
             >
               Run
             </Button>
-
             <Button
-              variant="outlined"
+              variant="contained"
               onClick={handleClear}
               startIcon={<RefreshIcon />}
               size="small"
               sx={{
-                color: "#f44336", // Red color for clear
-                borderColor: "#f44336",
-                "&:hover": { borderColor: "#d32f2f" },
+                backgroundColor: "#ff9800", // Orange background for 'Clear'
+                "&:hover": {
+                  backgroundColor: "#f57c00", // Darker orange on hover
+                },
               }}
             >
               Clear
             </Button>
-
             <Button
-              variant="outlined"
+              variant="contained"
               onClick={handleDownloadCode}
               startIcon={<DownloadIcon />}
               size="small"
               sx={{
-                color: "#1976d2", // Blue color for download
-                borderColor: "#1976d2",
-                "&:hover": { borderColor: "#1565c0" },
+                backgroundColor: "#2196f3", // Blue background for 'Download'
+                "&:hover": {
+                  backgroundColor: "#1976d2", // Darker blue on hover
+                },
               }}
             >
               Download
@@ -310,59 +291,36 @@ int main() {
           </Box>
 
           {executing && <LinearProgress />}
-          
-          {/* Input Box */}
-          <Box
-            sx={{
-              border: "1px solid #ddd",
-              padding: "8px",
-              borderRadius: "4px",
-              height: "150px",
-              overflowY: "auto",
-              backgroundColor: "#fff",
-            }}
-          >
-            <TextField
-              label="Input"
-              multiline
-              fullWidth
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              minRows={4}
-              sx={{
-                border: "none",
-                "& .MuiOutlinedInput-root": {
-                  padding: 0,
-                },
-              }}
-            />
-          </Box>
 
-          {/* Output Box */}
+          <InputLabel sx={{ color: textColor }}>Input</InputLabel>
+          <TextField
+            multiline
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            rows={5}
+            variant="outlined"
+            sx={{
+              backgroundColor: inputOutputBackground,
+              color: textColor,
+              borderRadius: 1,
+              border: `1px solid #ccc`,
+            }}
+          />
+
+          <InputLabel sx={{ color: textColor }}>Output</InputLabel>
           <Box
             sx={{
-              border: "1px solid #ddd",
-              padding: "8px",
-              borderRadius: "4px",
-              height: "150px",
+              backgroundColor: inputOutputBackground,
+              color: textColor,
+              padding: 2,
               overflowY: "auto",
-              backgroundColor: "#fff",
+              whiteSpace: "pre-line",
+              borderRadius: 1,
+              border: `1px solid #ccc`,
+              height: "30%",
             }}
           >
-            <TextField
-              label="Output"
-              multiline
-              fullWidth
-              value={currentFile.output}
-              disabled
-              minRows={4}
-              sx={{
-                border: "none",
-                "& .MuiOutlinedInput-root": {
-                  padding: 0,
-                },
-              }}
-            />
+            {currentFile.output}
           </Box>
         </Box>
       </Box>
