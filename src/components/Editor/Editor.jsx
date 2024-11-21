@@ -1,3 +1,4 @@
+import EditIcon from "@mui/icons-material/Edit"; // Import the Edit icon
 import DownloadIcon from "@mui/icons-material/CloudDownload";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -14,12 +15,12 @@ import {
   Tab,
   Tabs,
   InputLabel,
+  IconButton,
   useTheme,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import AceEditor from "react-ace";
 import { saveAs } from "file-saver";
-
 import "ace-builds/src-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/mode-c_cpp";
 import "ace-builds/src-noconflict/mode-java";
@@ -29,10 +30,12 @@ import "ace-builds/src-noconflict/theme-chrome"; // Light theme for Ace Editor
 function Editor() {
   const [activeTab, setActiveTab] = useState(0);
   const [files, setFiles] = useState([
-    { lang: "python3", code: `print("Welcome to Codetantra")`, output: "" },
+    { lang: "python3", code: `print("Welcome to Codetantra")`, output: "", name: "File 1" },
   ]);
   const [input, setInput] = useState("");
   const [executing, setExecuting] = useState(false);
+  const [isEditing, setIsEditing] = useState(null); // Track which file is being edited
+  const [newFileName, setNewFileName] = useState(""); // Track the new file name
 
   const theme = useTheme();
   const isDarkTheme = theme.palette.mode === "dark";
@@ -57,7 +60,7 @@ function Editor() {
   };
 
   const handleAddFile = () => {
-    const newFile = { lang: "python3", code: `print("Welcome to Codetantra")`, output: "" };
+    const newFile = { lang: "python3", code: `print("Welcome to Codetantra")`, output: "", name: `File ${files.length + 1}` };
     setFiles([...files, newFile]);
     setActiveTab(files.length);
     setInput("");
@@ -70,6 +73,18 @@ function Editor() {
       setActiveTab(Math.max(0, activeTab - 1));
       setInput("");
     }
+  };
+
+  const handleRenameFile = (index) => {
+    setIsEditing(index);
+    setNewFileName(files[index].name);
+  };
+
+  const handleSaveFileName = (index) => {
+    const updatedFiles = [...files];
+    updatedFiles[index].name = newFileName;
+    setFiles(updatedFiles);
+    setIsEditing(null);
   };
 
   const updateCode = (newCode) => {
@@ -189,7 +204,23 @@ int main() {
         {files.map((file, index) => (
           <Tab
             key={index}
-            label={`File ${index + 1}`}
+            label={
+              isEditing === index ? (
+                <TextField
+                  value={newFileName}
+                  onChange={(e) => setNewFileName(e.target.value)}
+                  onBlur={() => handleSaveFileName(index)}
+                  autoFocus
+                />
+              ) : (
+                <>
+                  {file.name}
+                  <IconButton size="small" onClick={() => handleRenameFile(index)}>
+                    <EditIcon />
+                  </IconButton>
+                </>
+              )
+            }
             onDoubleClick={() => handleDeleteFile(index)}
           />
         ))}
