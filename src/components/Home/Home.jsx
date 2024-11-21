@@ -1,4 +1,4 @@
-import { Box, Button, Container, Typography } from "@mui/material";
+import { Box, Button, Container, Typography, Grid } from "@mui/material";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { CustomContext } from "../../utils/customContext";
@@ -10,11 +10,7 @@ function Home() {
 
   // Light background color logic
   const getLightBackgroundColor = () => {
-    return isDarkMode ? "#2c2c2c" : "#f9f9f9"; // Dark gray for dark mode, very light gray for light mode
-  };
-
-  const getCardBackgroundColor = () => {
-    return isDarkMode ? "#3c3c3c" : "#ffffff"; // Slightly darker gray for cards in dark mode, pure white for light mode
+    return isDarkMode ? "#2c2c2c" : "#f9f9f9";
   };
 
   return (
@@ -36,7 +32,7 @@ function Home() {
           flexDirection: { xs: "column", md: "row" },
           alignItems: "center",
           justifyContent: "space-between",
-          gap: "2rem",
+          gap: "3rem",
           textAlign: "center",
         }}
       >
@@ -72,8 +68,7 @@ function Home() {
               marginBottom: "2rem",
             }}
           >
-            Discover the ultimate online coding platform for seamless learning,
-            collaboration, and innovation.
+            A powerful platform for seamless coding, collaboration, and learning.
           </Typography>
 
           <Box sx={{ display: "flex", gap: "1rem", justifyContent: { xs: "center", md: "flex-start" } }}>
@@ -120,55 +115,80 @@ function Home() {
           </Box>
         </Box>
 
-        {/* Right Section */}
-        <Box
-          sx={{
-            maxWidth: "400px",
-            width: "100%",
-            padding: "2rem",
-            borderRadius: "16px",
-            backgroundColor: getCardBackgroundColor(),
-            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.1)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            textAlign: "center",
-            gap: "1.5rem",
-          }}
-        >
-          <Typography
-            variant="h5"
-            sx={{
-              color: isDarkMode ? "#f9f9f9" : "#333",
-              fontWeight: 700,
-              fontFamily: "Poppins, sans-serif",
-            }}
-          >
-            Try Our Online Compiler
-          </Typography>
+        {/* Right Section - Feature Boxes */}
+        <Grid container spacing={3} sx={{ maxWidth: "600px" }}>
+          {/* Feature 1 */}
+          <Grid item xs={12} sm={6}>
+            <Box
+              sx={{
+                padding: "2rem",
+                borderRadius: "16px",
+                backgroundColor: isDarkMode ? "#3c3c3c" : "#ffffff",
+                boxShadow: "0 4px 16px rgba(0, 0, 0, 0.1)",
+                textAlign: "center",
+              }}
+            >
+              <Typography
+                variant="h5"
+                sx={{
+                  color: isDarkMode ? "#f9f9f9" : "#333",
+                  fontWeight: 700,
+                  fontFamily: "Poppins, sans-serif",
+                  marginBottom: "1rem",
+                }}
+              >
+                Real-Time Collaboration
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  color: isDarkMode ? "#dcdcdc" : "#555",
+                  fontSize: "1rem",
+                  fontFamily: "Poppins, sans-serif",
+                  lineHeight: 1.6,
+                }}
+              >
+                Work with teammates in real-time. Share your code and see changes instantly.
+              </Typography>
+            </Box>
+          </Grid>
 
-          <Typography
-            variant="body1"
-            sx={{
-              color: isDarkMode ? "#dcdcdc" : "#555",
-              fontSize: "1rem",
-              fontFamily: "Poppins, sans-serif",
-              lineHeight: 1.6,
-            }}
-          >
-            Instantly write, run, and debug code. Perfect for learners and professionals alike.
-          </Typography>
-
-          {/* Placeholder Image or Graphic */}
-          <Box
-            sx={{
-              width: "100%",
-              height: "150px",
-              background: "url('/assets/compiler-image.svg') no-repeat center center",
-              backgroundSize: "contain",
-            }}
-          ></Box>
-        </Box>
+          {/* Feature 2 */}
+          <Grid item xs={12} sm={6}>
+            <Box
+              sx={{
+                padding: "2rem",
+                borderRadius: "16px",
+                backgroundColor: isDarkMode ? "#3c3c3c" : "#ffffff",
+                boxShadow: "0 4px 16px rgba(0, 0, 0, 0.1)",
+                textAlign: "center",
+              }}
+            >
+              <Typography
+                variant="h5"
+                sx={{
+                  color: isDarkMode ? "#f9f9f9" : "#333",
+                  fontWeight: 700,
+                  fontFamily: "Poppins, sans-serif",
+                  marginBottom: "1rem",
+                }}
+              >
+                Multi-Language Support
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  color: isDarkMode ? "#dcdcdc" : "#555",
+                  fontSize: "1rem",
+                  fontFamily: "Poppins, sans-serif",
+                  lineHeight: 1.6,
+                }}
+              >
+                Write and execute code in various languages, including Python, Java, and C++.
+              </Typography>
+            </Box>
+          </Grid>
+        </Grid>
       </Container>
     </Box>
   );
