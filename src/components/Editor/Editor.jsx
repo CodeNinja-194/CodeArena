@@ -11,6 +11,7 @@ import {
   Tab,
   Tabs,
   TextField,
+  useTheme,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import AceEditor from "react-ace";
@@ -23,15 +24,22 @@ import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/theme-dracula";
 
 function Editor() {
-  const [activeTab, setActiveTab] = useState(0); // Track the active tab
+  const [activeTab, setActiveTab] = useState(0);
   const [files, setFiles] = useState([
     { lang: "python3", code: `print("Welcome to Codetantra")` },
-  ]); // Default file
+  ]);
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
   const [executing, setExecuting] = useState(false);
 
-  // Editor language mapping
+  const theme = useTheme(); // Get the current theme
+  const isDarkTheme = theme.palette.mode === "dark";
+
+  // Colors based on theme
+  const editorBackgroundColor = isDarkTheme ? "#272822" : "#f7f7f7";
+  const textColor = isDarkTheme ? "#f8f8f2" : "#333";
+  const inputBackgroundColor = isDarkTheme ? "#3a3f44" : "#ffffff";
+
   const languageMap = {
     cpp: "c_cpp",
     c: "c_cpp",
@@ -39,42 +47,36 @@ function Editor() {
     python3: "python",
   };
 
-  // Get the current file
   const currentFile = files[activeTab] || {};
   const editorLang = languageMap[currentFile.lang] || "python";
 
-  // Handle tab change
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
-    setOutput(""); // Clear output when switching tabs
+    setOutput("");
   };
 
-  // Add a new file
   const handleAddFile = () => {
     setFiles([
       ...files,
-      { lang: "python3", code: `print("Welcome to Codetantra")` }, // Default Python code
+      { lang: "python3", code: `print("Welcome to Codetantra")` },
     ]);
-    setActiveTab(files.length); // Switch to the newly added tab
+    setActiveTab(files.length);
   };
 
-  // Delete a file
   const handleDeleteFile = (index) => {
     if (files.length > 1) {
       const updatedFiles = files.filter((_, i) => i !== index);
       setFiles(updatedFiles);
-      setActiveTab(Math.max(0, activeTab - 1)); // Adjust active tab
+      setActiveTab(Math.max(0, activeTab - 1));
     }
   };
 
-  // Update code for the current tab
   const updateCode = (newCode) => {
     const updatedFiles = [...files];
     updatedFiles[activeTab].code = newCode;
     setFiles(updatedFiles);
   };
 
-  // Update language for the current tab
   const updateLanguage = (newLang) => {
     const updatedFiles = [...files];
     updatedFiles[activeTab].lang = newLang;
@@ -98,11 +100,10 @@ int main() {
 int main() {
     printf("Welcome to Codetantra");
     return 0;
-}`; // Reset code based on language
+}`;
     setFiles(updatedFiles);
   };
 
-  // Run the code
   const createRequest = async () => {
     try {
       setExecuting(true);
@@ -127,14 +128,12 @@ int main() {
     }
   };
 
-  // Clear the editor and output
   const handleClear = () => {
     updateCode("");
     setInput("");
     setOutput("");
   };
 
-  // Download the code
   const handleDownloadCode = () => {
     const languageArrayExtension = {
       java: "java",
@@ -149,7 +148,6 @@ int main() {
   return (
     <>
       <Box sx={{ height: "100vh", display: "grid", gridTemplateRows: "auto 1fr" }}>
-        {/* Tabs for switching between files */}
         <Tabs
           value={activeTab}
           onChange={handleTabChange}
@@ -160,20 +158,15 @@ int main() {
             <Tab
               key={index}
               label={`File ${index + 1}`}
-              onDoubleClick={() => handleDeleteFile(index)} // Delete on double-click
+              onDoubleClick={() => handleDeleteFile(index)}
             />
           ))}
-          <Button
-            onClick={handleAddFile}
-            sx={{ minWidth: "2rem", color: "primary.main" }}
-          >
+          <Button onClick={handleAddFile} sx={{ minWidth: "2rem", color: "primary.main" }}>
             +
           </Button>
         </Tabs>
 
-        {/* Main Editor and Controls */}
         <Box sx={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: 2 }}>
-          {/* Editor */}
           <AceEditor
             mode={editorLang}
             theme="dracula"
@@ -189,12 +182,15 @@ int main() {
               enableLiveAutocompletion: true,
               enableSnippets: true,
             }}
-            style={{ height: "calc(100vh - 48px)", width: "100%" }}
+            style={{
+              height: "calc(100vh - 48px)",
+              width: "100%",
+              backgroundColor: editorBackgroundColor,
+              color: textColor,
+            }}
           />
 
-          {/* Sidebar with controls */}
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {/* Language Selector */}
             <Select
               value={currentFile.lang}
               onChange={(e) => updateLanguage(e.target.value)}
@@ -206,46 +202,37 @@ int main() {
               <MenuItem value="java">Java</MenuItem>
             </Select>
 
-            {/* Buttons */}
-            <Button
-              variant="contained"
-              onClick={createRequest}
-              startIcon={<PlayArrowRoundedIcon />}
-              disabled={executing}
-            >
+            <Button variant="contained" onClick={createRequest} startIcon={<PlayArrowRoundedIcon />} disabled={executing}>
               Run
             </Button>
             <Button variant="contained" onClick={handleClear} startIcon={<RefreshIcon />}>
               Clear
             </Button>
-            <Button
-              variant="contained"
-              onClick={handleDownloadCode}
-              startIcon={<DownloadIcon />}
-            >
+            <Button variant="contained" onClick={handleDownloadCode} startIcon={<DownloadIcon />}>
               Download
             </Button>
 
-            {/* Execution Status */}
             {executing && <LinearProgress />}
 
-            {/* Input */}
-            <InputLabel>Input</InputLabel>
+            <InputLabel sx={{ color: textColor }}>Input</InputLabel>
             <TextField
               multiline
               value={input}
               onChange={(e) => setInput(e.target.value)}
               rows={5}
               variant="outlined"
-              sx={{ backgroundColor: "#272822", color: "white" }}
+              sx={{
+                backgroundColor: inputBackgroundColor,
+                color: textColor,
+                borderRadius: 1,
+              }}
             />
 
-            {/* Output */}
-            <InputLabel>Output</InputLabel>
+            <InputLabel sx={{ color: textColor }}>Output</InputLabel>
             <Box
               sx={{
-                backgroundColor: "#272822",
-                color: "white",
+                backgroundColor: inputBackgroundColor,
+                color: textColor,
                 padding: 2,
                 overflowY: "auto",
                 whiteSpace: "pre-line",
