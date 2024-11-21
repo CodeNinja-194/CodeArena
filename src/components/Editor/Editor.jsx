@@ -1,6 +1,7 @@
 import DownloadIcon from "@mui/icons-material/CloudDownload";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import EditIcon from "@mui/icons-material/Edit"; // Edit icon for file name
 import {
   Box,
   Button,
@@ -13,6 +14,7 @@ import {
   TextField,
   Tab,
   Tabs,
+  IconButton,
   useTheme,
 } from "@mui/material";
 import { useState, useEffect } from "react";
@@ -28,7 +30,7 @@ import "ace-builds/src-noconflict/theme-chrome"; // Light theme for Ace Editor
 function Editor() {
   const [activeTab, setActiveTab] = useState(0);
   const [files, setFiles] = useState([
-    { lang: "python3", code: `print("Welcome to Codetantra")`, output: "" },
+    { lang: "python3", code: `print("Welcome to Codetantra")`, output: "", name: "python3.py" },
   ]);
   const [input, setInput] = useState("");
   const [executing, setExecuting] = useState(false);
@@ -56,7 +58,7 @@ function Editor() {
   };
 
   const handleAddFile = () => {
-    const newFile = { lang: "python3", code: `print("Welcome to Codetantra")`, output: "" };
+    const newFile = { lang: "python3", code: `print("Welcome to Codetantra")`, output: "", name: "python3.py" };
     setFiles([...files, newFile]);
     setActiveTab(files.length);
     setInput("");
@@ -179,12 +181,34 @@ int main() {
         onChange={handleTabChange}
         variant="scrollable"
         scrollButtons="auto"
+        sx={{ minHeight: "36px" }} // Reduced height of tabs
       >
         {files.map((file, index) => (
           <Tab
             key={index}
-            label={`File ${index + 1}`}
+            label={
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <span style={{ fontSize: "14px" }}>{file.name}</span>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    const newFileName = prompt("Enter new file name", file.name);
+                    if (newFileName) {
+                      const updatedFiles = [...files];
+                      updatedFiles[activeTab].name = newFileName;
+                      setFiles(updatedFiles);
+                    }
+                  }}
+                >
+                  <EditIcon fontSize="inherit" />
+                </IconButton>
+              </Box>
+            }
             onDoubleClick={() => handleDeleteFile(index)}
+            sx={{
+              fontSize: "14px", // Reduced font size for file name
+              padding: "4px 8px", // Smaller padding for the tab
+            }}
           />
         ))}
         <Button onClick={handleAddFile} sx={{ minWidth: "2rem", color: "primary.main" }}>
@@ -287,26 +311,25 @@ int main() {
           {/* Input Box */}
           <Box
             sx={{
-              border: "1px solid #ccc",
+              border: "1px solid #ddd",
+              padding: "8px",
               borderRadius: "4px",
-              padding: "10px",
+              height: "150px",
+              overflowY: "auto",
               backgroundColor: "#fff",
             }}
           >
             <TextField
               label="Input"
-              variant="outlined"
               multiline
-              rows={4}
+              fullWidth
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              minRows={4}
               sx={{
-                width: "100%",
+                border: "none",
                 "& .MuiOutlinedInput-root": {
-                  borderColor: "#ccc", // Input field border color
-                  "&:hover fieldset": {
-                    borderColor: "#3f51b5", // Blue on hover
-                  },
+                  padding: 0,
                 },
               }}
             />
@@ -315,27 +338,25 @@ int main() {
           {/* Output Box */}
           <Box
             sx={{
-              border: "1px solid #ccc",
+              border: "1px solid #ddd",
+              padding: "8px",
               borderRadius: "4px",
-              padding: "10px",
-              backgroundColor: "#f5f5f5",
+              height: "150px",
+              overflowY: "auto",
+              backgroundColor: "#fff",
             }}
           >
             <TextField
               label="Output"
-              variant="outlined"
               multiline
-              rows={4}
+              fullWidth
               value={currentFile.output}
               disabled
+              minRows={4}
               sx={{
-                width: "100%",
-                backgroundColor: "#f5f5f5",
+                border: "none",
                 "& .MuiOutlinedInput-root": {
-                  borderColor: "#ccc", // Output field border color
-                  "&:hover fieldset": {
-                    borderColor: "#3f51b5", // Blue on hover
-                  },
+                  padding: 0,
                 },
               }}
             />
