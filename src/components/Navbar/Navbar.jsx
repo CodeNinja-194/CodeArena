@@ -1,11 +1,9 @@
-import CircleIcon from "@mui/icons-material/Circle";
 import Brightness4Icon from "@mui/icons-material/Brightness4"; // Dark mode icon
 import Brightness7Icon from "@mui/icons-material/Brightness7"; // Light mode icon
 import { AppBar, Box, Button, Container, IconButton, Typography } from "@mui/material";
 import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CustomContext } from "../../utils/customContext";
-import { greenTheme,yellowTheme } from "../../utils/cutomTheme";
 import "./Navbar.css";
 
 function Navbar() {
@@ -16,17 +14,6 @@ function Navbar() {
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   const toggleDarkMode = () => setIsDarkMode(!isDarkMode); // Toggle dark mode state
-
-  const getCircleColor = (themeColor) => {
-    switch (themeColor) {
-      case greenTheme:
-        return "#66bb6a";
-      case yellowTheme:
-        return "#ffeb3b";
-      default:
-        return "#fff";
-    }
-  };
 
   return (
     <AppBar
@@ -87,23 +74,8 @@ function Navbar() {
           </Button>
         </Box>
 
-        {/* Theme Switcher */}
+        {/* Dark Mode Toggle */}
         <Box sx={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-    
-          <CircleIcon
-            onClick={() => setTheme(greenTheme)}
-            sx={{
-              color: getCircleColor(greenTheme),
-              cursor: "pointer",
-            }}
-          />
-          <CircleIcon
-            onClick={() => setTheme(yellowTheme)}
-            sx={{
-              color: getCircleColor(yellowTheme),
-              cursor: "pointer",
-            }}
-          />
           {/* Dark Mode Toggle */}
           <IconButton onClick={toggleDarkMode} sx={{ color: isDarkMode ? "#f9f9f9" : "#333" }}>
             {isDarkMode ? <Brightness7Icon /> : <Brightness4Icon />}
