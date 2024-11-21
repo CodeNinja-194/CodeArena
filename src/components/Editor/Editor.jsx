@@ -53,15 +53,16 @@ function Editor() {
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
-    setOutput("");
+    setOutput(""); // Clear output
+    setInput(""); // Clear input
   };
 
   const handleAddFile = () => {
-    setFiles([
-      ...files,
-      { lang: "python3", code: `print("Welcome to Codetantra")` },
-    ]);
+    const newFile = { lang: "python3", code: `print("Welcome to Codetantra")` };
+    setFiles([...files, newFile]);
     setActiveTab(files.length);
+    setInput(""); // Clear input for new file
+    setOutput(""); // Clear output for new file
   };
 
   const handleDeleteFile = (index) => {
@@ -69,6 +70,8 @@ function Editor() {
       const updatedFiles = files.filter((_, i) => i !== index);
       setFiles(updatedFiles);
       setActiveTab(Math.max(0, activeTab - 1));
+      setInput(""); // Clear input after file deletion
+      setOutput(""); // Clear output after file deletion
     }
   };
 
@@ -130,9 +133,9 @@ int main() {
   };
 
   const handleClear = () => {
-    updateCode("");
-    setInput("");
-    setOutput("");
+    updateCode(""); // Reset code
+    setInput(""); // Clear input
+    setOutput(""); // Clear output
   };
 
   const handleDownloadCode = () => {
