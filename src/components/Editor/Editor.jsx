@@ -53,7 +53,7 @@ function Editor() {
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
-    setInput("");
+    setInput(""); // Reset input field when switching files
   };
 
   const handleAddFile = () => {
@@ -101,7 +101,8 @@ int main() {
         : `#include <stdio.h>
 int main() {
     printf("Welcome to Codetantra");
-    return 0}`;
+    return 0;
+}`;
     setFiles(updatedFiles);
   };
 
@@ -152,18 +153,22 @@ int main() {
     saveAs(blob, `code.${languageArrayExtension[currentFile.lang]}`);
   };
 
-  const handleKeyDown = (event) => {
-    if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
-      createRequest();
-    }
-  };
-
+  // Add the shortcut listener for 'Ctrl + Enter' or 'Cmd + Enter'
   useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+    const handleKeyPress = (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+        createRequest(); // Trigger the Run button functionality
+      }
     };
-  }, [files, activeTab]);
+
+    // Attach the event listener
+    window.addEventListener("keydown", handleKeyPress);
+
+    // Cleanup the event listener when the component is unmounted
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [createRequest]);
 
   return (
     <Box
@@ -248,35 +253,37 @@ int main() {
               size="small"
               sx={{
                 backgroundColor: "#4caf50", // Green background for 'Run'
-                "&:hover": { backgroundColor: "#45a049" },
+                "&:hover": {
+                  backgroundColor: "#388e3c", // Darker green on hover
+                },
               }}
             >
               Run
             </Button>
-
             <Button
-              variant="outlined"
+              variant="contained"
               onClick={handleClear}
               startIcon={<RefreshIcon />}
               size="small"
               sx={{
-                color: "#f44336", // Red color for clear
-                borderColor: "#f44336",
-                "&:hover": { borderColor: "#d32f2f" },
+                backgroundColor: "#ff9800", // Orange background for 'Clear'
+                "&:hover": {
+                  backgroundColor: "#f57c00", // Darker orange on hover
+                },
               }}
             >
               Clear
             </Button>
-
             <Button
-              variant="outlined"
+              variant="contained"
               onClick={handleDownloadCode}
               startIcon={<DownloadIcon />}
               size="small"
               sx={{
-                color: "#1976d2", // Blue color for download
-                borderColor: "#1976d2",
-                "&:hover": { borderColor: "#1565c0" },
+                backgroundColor: "#2196f3", // Blue background for 'Download'
+                "&:hover": {
+                  backgroundColor: "#1976d2", // Darker blue on hover
+                },
               }}
             >
               Download
@@ -284,27 +291,37 @@ int main() {
           </Box>
 
           {executing && <LinearProgress />}
+
+          <InputLabel sx={{ color: textColor }}>Input</InputLabel>
           <TextField
-            label="Input"
-            variant="outlined"
             multiline
-            rows={4}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            sx={{ flex: 1 }}
-          />
-          <TextField
-            label="Output"
+            rows={5}
             variant="outlined"
-            multiline
-            rows={4}
-            value={currentFile.output}
-            disabled
             sx={{
-              flex: 1,
-              backgroundColor: "#f5f5f5",
+              backgroundColor: inputOutputBackground,
+              color: textColor,
+              borderRadius: 1,
+              border: `1px solid #ccc`,
             }}
           />
+
+          <InputLabel sx={{ color: textColor }}>Output</InputLabel>
+          <Box
+            sx={{
+              backgroundColor: inputOutputBackground,
+              color: textColor,
+              padding: 2,
+              overflowY: "auto",
+              whiteSpace: "pre-line",
+              borderRadius: 1,
+              border: `1px solid #ccc`,
+              height: "30%",
+            }}
+          >
+            {currentFile.output}
+          </Box>
         </Box>
       </Box>
     </Box>
