@@ -283,43 +283,63 @@ int main() {
           </Box>
 
           {executing && <LinearProgress />}
-          <TextField
-            label="Input"
-            variant="outlined"
-            multiline
-            rows={4}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
+          
+          {/* Input Box */}
+          <Box
             sx={{
-              flex: 1,
-              borderColor: "#ccc",
-              "& .MuiOutlinedInput-root": {
-                borderColor: "#ccc", // Input field border color
-                "&:hover fieldset": {
-                  borderColor: "#3f51b5", // Blue on hover
-                },
-              },
+              border: "1px solid #ccc",
+              borderRadius: "4px",
+              padding: "10px",
+              backgroundColor: "#fff",
             }}
-          />
-          <TextField
-            label="Output"
-            variant="outlined"
-            multiline
-            rows={4}
-            value={currentFile.output}
-            disabled
+          >
+            <TextField
+              label="Input"
+              variant="outlined"
+              multiline
+              rows={4}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              sx={{
+                width: "100%",
+                "& .MuiOutlinedInput-root": {
+                  borderColor: "#ccc", // Input field border color
+                  "&:hover fieldset": {
+                    borderColor: "#3f51b5", // Blue on hover
+                  },
+                },
+              }}
+            />
+          </Box>
+
+          {/* Output Box */}
+          <Box
             sx={{
-              flex: 1,
+              border: "1px solid #ccc",
+              borderRadius: "4px",
+              padding: "10px",
               backgroundColor: "#f5f5f5",
-              borderColor: "#ccc",
-              "& .MuiOutlinedInput-root": {
-                borderColor: "#ccc", // Output field border color
-                "&:hover fieldset": {
-                  borderColor: "#3f51b5", // Blue on hover
-                },
-              },
             }}
-          />
+          >
+            <TextField
+              label="Output"
+              variant="outlined"
+              multiline
+              rows={4}
+              value={currentFile.output}
+              disabled
+              sx={{
+                width: "100%",
+                backgroundColor: "#f5f5f5",
+                "& .MuiOutlinedInput-root": {
+                  borderColor: "#ccc", // Output field border color
+                  "&:hover fieldset": {
+                    borderColor: "#3f51b5", // Blue on hover
+                  },
+                },
+              }}
+            />
+          </Box>
         </Box>
       </Box>
     </Box>
