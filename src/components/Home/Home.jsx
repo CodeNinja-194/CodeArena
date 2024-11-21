@@ -1,64 +1,61 @@
 import { Box, Button, Container, Typography } from "@mui/material";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { CustomContext } from "../../utils/customContext"; // Import context to access the theme
-import "./Home.css"; // Import the CSS file
+import { CustomContext } from "../../utils/customContext";
+import "./Home.css";
 
 function Home() {
   const navigate = useNavigate();
-  const { theme } = useContext(CustomContext); // Access the current theme
+  const { theme, isDarkMode } = useContext(CustomContext);
 
-  // Function to get the light background color based on the current theme
-  const getLightBackgroundColor = (themeColor) => {
-    switch (themeColor) {
-      case "blue":
-        return "#e3f2fd"; // Light Blue background
-      case "yellow":
-        return "#fff9c4"; // Light Yellow background
-      default:
-        return "#ffe0b2"; // Default Light background (can be light orange or any other)
-    }
+  // Light background color logic
+  const getLightBackgroundColor = () => {
+    return isDarkMode ? "#2c2c2c" : "#f9f9f9"; // Dark gray for dark mode, very light gray for light mode
+  };
+
+  const getCardBackgroundColor = () => {
+    return isDarkMode ? "#3c3c3c" : "#ffffff"; // Slightly darker gray for cards in dark mode, pure white for light mode
   };
 
   return (
     <Box
       sx={{
-        height: "100vh", // Full screen height
+        height: "100vh",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
         flexDirection: "column",
-        background: getLightBackgroundColor(theme), // Use dynamic light background color based on theme
+        background: getLightBackgroundColor(),
         padding: "3rem",
-        overflow: "hidden", // Prevent content overflow
       }}
     >
-      <Container maxWidth="lg" sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "3rem" }}>
-        {/* Left Section with Text */}
+      <Container
+        maxWidth="lg"
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "2rem",
+          textAlign: "center",
+        }}
+      >
+        {/* Left Section */}
         <Box
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            gap: "2rem",
-            width: "100%",
-            maxWidth: 600,
-            textAlign: "center",
-            zIndex: 10,
-            animation: "fadeIn 1.5s ease-in-out", // Fade-in effect for text
+            maxWidth: "600px",
+            textAlign: { xs: "center", md: "left" },
+            animation: "fadeIn 1.5s ease-in-out",
           }}
         >
           <Typography
             variant="h2"
             sx={{
-              color: "primary.main",
-              fontSize: "4rem", // Increased font size
+              color: isDarkMode ? "#f9f9f9" : "#333",
+              fontSize: "3rem",
               fontWeight: 900,
-              fontFamily: "poppins",
-              letterSpacing: "0.05rem",
-              animation: "typing 3s steps(30) 1s 1 normal both, blink-caret 0.75s step-end infinite", // Typewriter effect for the title
-              whiteSpace: "nowrap",
-              overflow: "hidden", // Hide text overflow
+              fontFamily: "Poppins, sans-serif",
+              marginBottom: "1rem",
             }}
           >
             CodeArena
@@ -67,59 +64,53 @@ function Home() {
           <Typography
             variant="h6"
             sx={{
-              color: "text.secondary", // Slightly muted color for contrast
-              fontSize: "1.6rem",
-              fontWeight: 600,
-              fontFamily: "poppins",
-              textAlign: "center",
-              marginBottom: "3rem",
-              lineHeight: 1.5,
-              animation: "slideIn 2s ease-out", // Slide-in animation for the description
-              letterSpacing: "0.02rem",
+              color: isDarkMode ? "#dcdcdc" : "#555",
+              fontSize: "1.2rem",
+              fontWeight: 500,
+              fontFamily: "Poppins, sans-serif",
+              lineHeight: 1.6,
+              marginBottom: "2rem",
             }}
           >
-            A seamless online compiler for coding challenges, collaborations, and learning.
+            Discover the ultimate online coding platform for seamless learning,
+            collaboration, and innovation.
           </Typography>
 
-          <Box sx={{ display: "flex", justifyContent: "center", gap: "2rem" }}>
-            {/* Button to navigate to the editor */}
+          <Box sx={{ display: "flex", gap: "1rem", justifyContent: { xs: "center", md: "flex-start" } }}>
             <Button
               variant="contained"
               sx={{
-                backgroundColor: "primary.main",
-                color: "background.paper",
-                fontSize: "1.2rem",
-                fontWeight: 700,
-                padding: "1rem 2.5rem", // Larger padding for emphasis
-                fontFamily: "poppins",
-                borderRadius: "50px", // Rounded button for a soft look
-                boxShadow: "0 4px 8px rgba(0,0,0,0.15)",
-                animation: "pulse 2s infinite", // Pulse animation on the button
+                backgroundColor: isDarkMode ? "#42a5f5" : "#4caf50",
+                color: "#fff",
+                padding: "0.75rem 2rem",
+                borderRadius: "25px",
+                fontSize: "1rem",
+                fontWeight: 600,
+                fontFamily: "Poppins, sans-serif",
+                textTransform: "none",
                 "&:hover": {
-                  backgroundColor: "primary.dark", // Hover effect for the button
-                  boxShadow: "0 8px 16px rgba(0,0,0,0.2)", // Stronger shadow on hover
+                  backgroundColor: isDarkMode ? "#1e88e5" : "#388e3c",
                 },
               }}
               onClick={() => navigate("/editor")}
             >
-              Start Coding Now
+              Start Coding
             </Button>
 
-            {/* Button to navigate to features */}
             <Button
               variant="outlined"
               sx={{
-                color: "primary.main",
-                fontSize: "1.2rem",
-                fontWeight: 700,
-                padding: "1rem 2.5rem", // Larger padding for emphasis
-                fontFamily: "poppins",
-                borderRadius: "50px",
-                border: "2px solid",
-                animation: "pulse 2s infinite", // Pulse animation on the button
+                borderColor: isDarkMode ? "#42a5f5" : "#4caf50",
+                color: isDarkMode ? "#42a5f5" : "#4caf50",
+                padding: "0.75rem 2rem",
+                borderRadius: "25px",
+                fontSize: "1rem",
+                fontWeight: 600,
+                fontFamily: "Poppins, sans-serif",
+                textTransform: "none",
                 "&:hover": {
-                  borderColor: "primary.dark", // Hover effect for the button
-                  color: "primary.dark",
+                  borderColor: isDarkMode ? "#1e88e5" : "#388e3c",
+                  color: isDarkMode ? "#1e88e5" : "#388e3c",
                 },
               }}
               onClick={() => navigate("/features")}
@@ -129,32 +120,28 @@ function Home() {
           </Box>
         </Box>
 
-        {/* Right Section - Visual representation of online coding */}
+        {/* Right Section */}
         <Box
           sx={{
+            maxWidth: "400px",
+            width: "100%",
+            padding: "2rem",
+            borderRadius: "16px",
+            backgroundColor: getCardBackgroundColor(),
+            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.1)",
             display: "flex",
             flexDirection: "column",
-            justifyContent: "center",
             alignItems: "center",
-            gap: "2rem",
-            zIndex: 10,
-            width: "100%",
-            maxWidth: 400,
-            padding: "2rem",
-            borderRadius: "8px",
-            backgroundColor: "rgba(255, 255, 255, 0.1)",
-            boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+            textAlign: "center",
+            gap: "1.5rem",
           }}
         >
           <Typography
             variant="h5"
             sx={{
-              color: "background.paper",
+              color: isDarkMode ? "#f9f9f9" : "#333",
               fontWeight: 700,
-              fontFamily: "poppins",
-              textAlign: "center",
-              marginBottom: "1.5rem",
-              fontSize: "1.8rem",
+              fontFamily: "Poppins, sans-serif",
             }}
           >
             Try Our Online Compiler
@@ -163,25 +150,22 @@ function Home() {
           <Typography
             variant="body1"
             sx={{
-              color: "text.secondary",
-              fontSize: "1.2rem",
-              fontWeight: 600,
-              lineHeight: 1.5,
-              marginBottom: "2rem",
-              textAlign: "center",
+              color: isDarkMode ? "#dcdcdc" : "#555",
+              fontSize: "1rem",
+              fontFamily: "Poppins, sans-serif",
+              lineHeight: 1.6,
             }}
           >
-            Write, run, and test your code instantly. It's the perfect environment for learning and collaborating.
+            Instantly write, run, and debug code. Perfect for learners and professionals alike.
           </Typography>
 
-          {/* Icon or graphic for the coding interface */}
+          {/* Placeholder Image or Graphic */}
           <Box
             sx={{
               width: "100%",
-              height: "200px",
+              height: "150px",
               background: "url('/assets/compiler-image.svg') no-repeat center center",
               backgroundSize: "contain",
-              borderRadius: "8px",
             }}
           ></Box>
         </Box>
