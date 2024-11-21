@@ -15,6 +15,10 @@ import {
   Tabs,
   InputLabel,
   useTheme,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import AceEditor from "react-ace";
@@ -29,10 +33,12 @@ import "ace-builds/src-noconflict/theme-chrome"; // Light theme for Ace Editor
 function Editor() {
   const [activeTab, setActiveTab] = useState(0);
   const [files, setFiles] = useState([
-    { lang: "python3", code: `print("Welcome to Codetantra")`, output: "" },
+    { lang: "python3", code: `print("Welcome to Codetantra")`, output: "", name: "python3.py" },
   ]);
   const [input, setInput] = useState("");
   const [executing, setExecuting] = useState(false);
+  const [openRenameDialog, setOpenRenameDialog] = useState(false);
+  const [newFileName, setNewFileName] = useState("");
 
   const theme = useTheme();
   const isDarkTheme = theme.palette.mode === "dark";
@@ -48,16 +54,25 @@ function Editor() {
     python3: "python",
   };
 
+  const languageExtension = {
+    python3: "py",
+    cpp: "cpp",
+    java: "java",
+    c: "c",
+  };
+
   const currentFile = files[activeTab] || {};
   const editorLang = languageMap[currentFile.lang] || "python";
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
-    setInput(""); // Reset input field when switching files
+    setInput("");
   };
 
   const handleAddFile = () => {
-    const newFile = { lang: "python3", code: `print("Welcome to Codetantra")`, output: "" };
+    const newLang = "python3"; // Default language
+    const newFileName = `${newLang}.${languageExtension[newLang]}`;
+    const newFile = { lang: newLang, code: `print("Welcome to Codetantra")`, output: "", name: newFileName };
     setFiles([...files, newFile]);
     setActiveTab(files.length);
     setInput("");
@@ -101,8 +116,10 @@ int main() {
         : `#include <stdio.h>
 int main() {
     printf("Welcome to Codetantra");
-    return 0;
-}`;
+    return 0}`;
+    
+    // Renaming the file based on the language
+    updatedFiles[activeTab].name = `${newLang}.${languageExtension[newLang]}`;
     setFiles(updatedFiles);
   };
 
@@ -143,32 +160,35 @@ int main() {
   };
 
   const handleDownloadCode = () => {
-    const languageArrayExtension = {
-      java: "java",
-      python3: "py",
-      cpp: "cpp",
-      c: "c",
-    };
+    const fileName = newFileName || currentFile.name; // Use the new name if set, else fallback to the default
     const blob = new Blob([currentFile.code], { type: "text/plain;charset=utf-8" });
-    saveAs(blob, `code.${languageArrayExtension[currentFile.lang]}`);
+    saveAs(blob, fileName);
   };
 
-  // Add the shortcut listener for 'Ctrl + Enter' or 'Cmd + Enter'
+  const handleKeyDown = (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+      createRequest();
+    }
+  };
+
+  const openRenameDialogHandler = () => {
+    setNewFileName(currentFile.name); // Default to current file name
+    setOpenRenameDialog(true);
+  };
+
+  const handleRename = () => {
+    const updatedFiles = [...files];
+    updatedFiles[activeTab].name = newFileName;
+    setFiles(updatedFiles);
+    setOpenRenameDialog(false);
+  };
+
   useEffect(() => {
-    const handleKeyPress = (event) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
-        createRequest(); // Trigger the Run button functionality
-      }
-    };
-
-    // Attach the event listener
-    window.addEventListener("keydown", handleKeyPress);
-
-    // Cleanup the event listener when the component is unmounted
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
-      window.removeEventListener("keydown", handleKeyPress);
+      window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [createRequest]);
+  }, [files, activeTab]);
 
   return (
     <Box
@@ -189,7 +209,7 @@ int main() {
         {files.map((file, index) => (
           <Tab
             key={index}
-            label={`File ${index + 1}`}
+            label={file.name}  // Display the dynamic file name (e.g., python3.py)
             onDoubleClick={() => handleDeleteFile(index)}
           />
         ))}
@@ -275,55 +295,67 @@ int main() {
               Clear
             </Button>
             <Button
-              variant="contained"
-              onClick={handleDownloadCode}
+              variant="outlined"
+              onClick={openRenameDialogHandler}  // Open rename dialog
               startIcon={<DownloadIcon />}
               size="small"
               sx={{
-                backgroundColor: "#2196f3", // Blue background for 'Download'
-                "&:hover": {
-                  backgroundColor: "#1976d2", // Darker blue on hover
-                },
+                color: "#1976d2", // Blue color for download
+                borderColor: "#1976d2",
+                "&:hover": { borderColor: "#1565c0" },
               }}
             >
-              Download
+              Rename & Download
             </Button>
           </Box>
 
           {executing && <LinearProgress />}
 
-          <InputLabel sx={{ color: textColor }}>Input</InputLabel>
           <TextField
+            label="Input"
+            variant="outlined"
             multiline
+            rows={4}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            rows={5}
+            sx={{ flex: 1 }}
+          />
+          <TextField
+            label="Output"
             variant="outlined"
+            multiline
+            rows={4}
+            value={currentFile.output}
+            disabled
             sx={{
-              backgroundColor: inputOutputBackground,
-              color: textColor,
-              borderRadius: 1,
-              border: `1px solid #ccc`,
+              flex: 1,
+              backgroundColor: "#f5f5f5",
             }}
           />
-
-          <InputLabel sx={{ color: textColor }}>Output</InputLabel>
-          <Box
-            sx={{
-              backgroundColor: inputOutputBackground,
-              color: textColor,
-              padding: 2,
-              overflowY: "auto",
-              whiteSpace: "pre-line",
-              borderRadius: 1,
-              border: `1px solid #ccc`,
-              height: "30%",
-            }}
-          >
-            {currentFile.output}
-          </Box>
         </Box>
       </Box>
+
+      {/* Rename Dialog */}
+      <Dialog open={openRenameDialog} onClose={() => setOpenRenameDialog(false)}>
+        <DialogTitle>Rename File</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="New File Name"
+            variant="outlined"
+            fullWidth
+            value={newFileName}
+            onChange={(e) => setNewFileName(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenRenameDialog(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleRename} color="primary">
+            Rename
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
