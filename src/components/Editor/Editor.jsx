@@ -13,7 +13,7 @@ import {
   TextField,
   useTheme,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AceEditor from "react-ace";
 import { saveAs } from "file-saver";
 
@@ -26,7 +26,7 @@ import "ace-builds/src-noconflict/theme-chrome"; // Light theme for Ace Editor
 function Editor() {
   const [activeTab, setActiveTab] = useState(0);
   const [files, setFiles] = useState([
-    { lang: "python3", code: `print("Welcome to Codetantra")` },
+    { lang: "python3", code: print("Welcome to Codetantra") },
   ]);
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
@@ -36,12 +36,12 @@ function Editor() {
   const isDarkTheme = theme.palette.mode === "dark";
 
   // Colors based on theme
-  const editorBackgroundColor = "#f5f5f5";
-  const textColor = "#333";
-  const inputOutputBackground = "#ffffff";
-  const inputOutputBorder = "#ddd";
-  const dropdownBackground = "#ffffff";
-  const dropdownTextColor = "#333";
+  const editorBackgroundColor = isDarkTheme ? "#f5f5f5" : "#ffffff";
+  const textColor = isDarkTheme ? "#333" : "#333";
+  const inputOutputBackground = isDarkTheme ? "#ffffff" : "#f9f9f9";
+  const inputOutputBorder = isDarkTheme ? "#ccc" : "#ddd";
+  const dropdownBackground = isDarkTheme ? "#ffffff" : "#f9f9f9";
+  const dropdownTextColor = isDarkTheme ? "#333" : "#333";
 
   const languageMap = {
     cpp: "c_cpp",
@@ -60,7 +60,7 @@ function Editor() {
   };
 
   const handleAddFile = () => {
-    const newFile = { lang: "python3", code: `print("Welcome to Codetantra")` };
+    const newFile = { lang: "python3", code: print("Welcome to Codetantra") };
     setFiles([...files, newFile]);
     setActiveTab(files.length);
     setInput(""); // Clear input for new file
@@ -88,26 +88,26 @@ function Editor() {
     updatedFiles[activeTab].lang = newLang;
     updatedFiles[activeTab].code =
       newLang === "python3"
-        ? `print("Welcome to Codetantra")`
+        ? print("Welcome to Codetantra")
         : newLang === "java"
-        ? `import java.util.*;
+        ? import java.util.*;
         class Main {
     public static void main(String[] args) {
         System.out.println("Welcome to Codetantra");
     }
-}`
+}
         : newLang === "cpp"
-        ? `#include <iostream>
+        ? #include <iostream>
 using namespace std;
 int main() {
     cout << "Welcome to Codetantra";
     return 0;
-}`
-        : `#include <stdio.h>
+}
+        : #include <stdio.h>
 int main() {
     printf("Welcome to Codetantra");
     return 0;
-}`;
+};
     setFiles(updatedFiles);
   };
 
@@ -149,7 +149,7 @@ int main() {
       c: "c",
     };
     const blob = new Blob([currentFile.code], { type: "text/plain;charset=utf-8" });
-    saveAs(blob, `code.${languageArrayExtension[currentFile.lang]}`);
+    saveAs(blob, code.${languageArrayExtension[currentFile.lang]});
   };
 
   return (
@@ -171,7 +171,7 @@ int main() {
           {files.map((file, index) => (
             <Tab
               key={index}
-              label={`File ${index + 1}`}
+              label={File ${index + 1}}
               onDoubleClick={() => handleDeleteFile(index)}
             />
           ))}
@@ -184,7 +184,7 @@ int main() {
           <AceEditor
             mode={editorLang}
             theme="chrome" // Light theme
-            name={`editor-${activeTab}`}
+            name={editor-${activeTab}}
             onChange={updateCode}
             value={currentFile.code}
             fontSize={16}
@@ -213,7 +213,7 @@ int main() {
                 color: dropdownTextColor,
                 borderRadius: 1,
                 marginBottom: "1rem",
-                border: `1px solid ${inputOutputBorder}`,
+                border: 1px solid ${inputOutputBorder},
               }}
             >
               <MenuItem value="python3">Python</MenuItem>
@@ -233,8 +233,7 @@ int main() {
             </Button>
 
             {executing && <LinearProgress />}
-
-            <InputLabel sx={{ color: textColor }}>Input</InputLabel>
+                      <InputLabel sx={{ color: textColor }}>Input</InputLabel>
             <TextField
               multiline
               value={input}
