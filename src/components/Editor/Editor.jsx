@@ -29,7 +29,7 @@ import "ace-builds/src-noconflict/theme-chrome"; // Light theme for Ace Editor
 function Editor() {
   const [activeTab, setActiveTab] = useState(0);
   const [files, setFiles] = useState([
-    { lang: "python3", code: `print("Welcome to Codetantra")`, output: "", name: "python3.py" },
+    { lang: "python3", code: `print("Welcome to Codetantra")`, output: "" },
   ]);
   const [input, setInput] = useState("");
   const [executing, setExecuting] = useState(false);
@@ -48,13 +48,6 @@ function Editor() {
     python3: "python",
   };
 
-  const languageExtension = {
-    python3: "py",
-    cpp: "cpp",
-    java: "java",
-    c: "c",
-  };
-
   const currentFile = files[activeTab] || {};
   const editorLang = languageMap[currentFile.lang] || "python";
 
@@ -64,9 +57,7 @@ function Editor() {
   };
 
   const handleAddFile = () => {
-    const newLang = "python3"; // Default language
-    const newFileName = `${newLang}.${languageExtension[newLang]}`;
-    const newFile = { lang: newLang, code: `print("Welcome to Codetantra")`, output: "", name: newFileName };
+    const newFile = { lang: "python3", code: `print("Welcome to Codetantra")`, output: "" };
     setFiles([...files, newFile]);
     setActiveTab(files.length);
     setInput("");
@@ -111,9 +102,6 @@ int main() {
 int main() {
     printf("Welcome to Codetantra");
     return 0}`;
-    
-    // Renaming the file based on the language
-    updatedFiles[activeTab].name = `${newLang}.${languageExtension[newLang]}`;
     setFiles(updatedFiles);
   };
 
@@ -154,8 +142,14 @@ int main() {
   };
 
   const handleDownloadCode = () => {
+    const languageArrayExtension = {
+      java: "java",
+      python3: "py",
+      cpp: "cpp",
+      c: "c",
+    };
     const blob = new Blob([currentFile.code], { type: "text/plain;charset=utf-8" });
-    saveAs(blob, currentFile.name);
+    saveAs(blob, `code.${languageArrayExtension[currentFile.lang]}`);
   };
 
   const handleKeyDown = (event) => {
@@ -190,7 +184,7 @@ int main() {
         {files.map((file, index) => (
           <Tab
             key={index}
-            label={`File ${index + 1}: ${file.name}`}
+            label={`File ${index + 1}`}
             onDoubleClick={() => handleDeleteFile(index)}
           />
         ))}
