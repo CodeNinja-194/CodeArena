@@ -29,10 +29,9 @@ import "ace-builds/src-noconflict/theme-chrome"; // Light theme for Ace Editor
 function Editor() {
   const [activeTab, setActiveTab] = useState(0);
   const [files, setFiles] = useState([
-    { lang: "python3", code: `print("Welcome to Codetantra")` },
+    { lang: "python3", code: `print("Welcome to Codetantra")`, output: "" },
   ]);
   const [input, setInput] = useState("");
-  const [output, setOutput] = useState("");
   const [executing, setExecuting] = useState(false);
 
   const theme = useTheme();
@@ -41,7 +40,6 @@ function Editor() {
   const editorBackgroundColor = isDarkTheme ? "#f5f5f5" : "#ffffff";
   const textColor = "#333"; // Uniform text color
   const inputOutputBackground = "#ffffff"; // White background for non-editor fields
-  const buttonBackground = "#f0f0f0"; // Subtle background for buttons
 
   const languageMap = {
     cpp: "c_cpp",
@@ -55,16 +53,14 @@ function Editor() {
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
-    setOutput("");
-    setInput("");
+    setInput(""); // Reset input field when switching files
   };
 
   const handleAddFile = () => {
-    const newFile = { lang: "python3", code: `print("Welcome to Codetantra")` };
+    const newFile = { lang: "python3", code: `print("Welcome to Codetantra")`, output: "" };
     setFiles([...files, newFile]);
     setActiveTab(files.length);
     setInput("");
-    setOutput("");
   };
 
   const handleDeleteFile = (index) => {
@@ -73,7 +69,6 @@ function Editor() {
       setFiles(updatedFiles);
       setActiveTab(Math.max(0, activeTab - 1));
       setInput("");
-      setOutput("");
     }
   };
 
@@ -127,10 +122,14 @@ int main() {
         }
       );
       const result = await response.json();
-      setOutput(result.data?.output || result.data?.error || "Error occurred");
+      const updatedFiles = [...files];
+      updatedFiles[activeTab].output = result.data?.output || result.data?.error || "Error occurred";
+      setFiles(updatedFiles);
       setExecuting(false);
     } catch (error) {
-      setOutput("Network Error or Server Down");
+      const updatedFiles = [...files];
+      updatedFiles[activeTab].output = "Network Error or Server Down";
+      setFiles(updatedFiles);
       setExecuting(false);
     }
   };
@@ -138,7 +137,9 @@ int main() {
   const handleClear = () => {
     updateCode("");
     setInput("");
-    setOutput("");
+    const updatedFiles = [...files];
+    updatedFiles[activeTab].output = "";
+    setFiles(updatedFiles);
   };
 
   const handleDownloadCode = () => {
@@ -167,7 +168,7 @@ int main() {
     return () => {
       window.removeEventListener("keydown", handleKeyPress);
     };
-  }, [createRequest]); // The effect depends on createRequest
+  }, [createRequest]);
 
   return (
     <Box
@@ -319,7 +320,7 @@ int main() {
               height: "30%",
             }}
           >
-            {output}
+            {currentFile.output}
           </Box>
         </Box>
       </Box>
