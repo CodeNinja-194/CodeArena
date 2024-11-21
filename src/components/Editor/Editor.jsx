@@ -15,10 +15,6 @@ import {
   Tabs,
   InputLabel,
   useTheme,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import AceEditor from "react-ace";
@@ -37,7 +33,7 @@ function Editor() {
   ]);
   const [input, setInput] = useState("");
   const [executing, setExecuting] = useState(false);
-  const [openRenameDialog, setOpenRenameDialog] = useState(false);
+  const [editingFileName, setEditingFileName] = useState(null);
   const [newFileName, setNewFileName] = useState("");
 
   const theme = useTheme();
@@ -123,6 +119,18 @@ int main() {
     setFiles(updatedFiles);
   };
 
+  const handleRenameFile = (index) => {
+    setEditingFileName(index);
+    setNewFileName(files[index].name); // Set the current name for editing
+  };
+
+  const saveFileName = (index) => {
+    const updatedFiles = [...files];
+    updatedFiles[index].name = newFileName;
+    setFiles(updatedFiles);
+    setEditingFileName(null);
+  };
+
   const createRequest = async () => {
     try {
       setExecuting(true);
@@ -160,27 +168,14 @@ int main() {
   };
 
   const handleDownloadCode = () => {
-    const fileName = newFileName || currentFile.name; // Use the new name if set, else fallback to the default
     const blob = new Blob([currentFile.code], { type: "text/plain;charset=utf-8" });
-    saveAs(blob, fileName);
+    saveAs(blob, currentFile.name);
   };
 
   const handleKeyDown = (event) => {
     if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
       createRequest();
     }
-  };
-
-  const openRenameDialogHandler = () => {
-    setNewFileName(currentFile.name); // Default to current file name
-    setOpenRenameDialog(true);
-  };
-
-  const handleRename = () => {
-    const updatedFiles = [...files];
-    updatedFiles[activeTab].name = newFileName;
-    setFiles(updatedFiles);
-    setOpenRenameDialog(false);
   };
 
   useEffect(() => {
@@ -209,7 +204,24 @@ int main() {
         {files.map((file, index) => (
           <Tab
             key={index}
-            label={file.name}  // Display the dynamic file name (e.g., python3.py)
+            label={
+              editingFileName === index ? (
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <TextField
+                    value={newFileName}
+                    onChange={(e) => setNewFileName(e.target.value)}
+                    size="small"
+                    sx={{ width: "100px" }}
+                  />
+                  <Button onClick={() => saveFileName(index)}>Save</Button>
+                </Box>
+              ) : (
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  {file.name}
+                  <Button onClick={() => handleRenameFile(index)}>✏️</Button>
+                </Box>
+              )
+            }
             onDoubleClick={() => handleDeleteFile(index)}
           />
         ))}
@@ -296,7 +308,7 @@ int main() {
             </Button>
             <Button
               variant="outlined"
-              onClick={openRenameDialogHandler}  // Open rename dialog
+              onClick={handleDownloadCode}
               startIcon={<DownloadIcon />}
               size="small"
               sx={{
@@ -305,12 +317,11 @@ int main() {
                 "&:hover": { borderColor: "#1565c0" },
               }}
             >
-              Rename & Download
+              Download
             </Button>
           </Box>
 
           {executing && <LinearProgress />}
-
           <TextField
             label="Input"
             variant="outlined"
@@ -334,28 +345,6 @@ int main() {
           />
         </Box>
       </Box>
-
-      {/* Rename Dialog */}
-      <Dialog open={openRenameDialog} onClose={() => setOpenRenameDialog(false)}>
-        <DialogTitle>Rename File</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="New File Name"
-            variant="outlined"
-            fullWidth
-            value={newFileName}
-            onChange={(e) => setNewFileName(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenRenameDialog(false)} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleRename} color="primary">
-            Rename
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 }
