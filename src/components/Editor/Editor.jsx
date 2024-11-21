@@ -13,7 +13,7 @@ import {
   TextField,
   useTheme,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import AceEditor from "react-ace";
 import { saveAs } from "file-saver";
 
@@ -37,10 +37,10 @@ function Editor() {
 
   // Colors based on theme
   const editorBackgroundColor = isDarkTheme ? "#1e1e1e" : "#ffffff";
-  const textColor = isDarkTheme ? "#f8f8f2" : "#333";
-  const inputOutputBackground = isDarkTheme ? "#2d2d2d" : "#ffffff";
+  const textColor = isDarkTheme ? "#333" : "#333";
+  const inputOutputBackground = "#f5f5f5"; // Light white background
+  const inputOutputTextColor = "#000"; // Black text for visibility
   const dropdownBackground = isDarkTheme ? "#3a3f44" : "#ffffff";
-  const inputOutputTextColor = isDarkTheme ? "#f8f8f2" : "#333";
 
   const languageMap = {
     cpp: "c_cpp",
@@ -54,16 +54,16 @@ function Editor() {
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
-    setOutput(""); // Clear output
-    setInput(""); // Clear input
+    setOutput("");
+    setInput("");
   };
 
   const handleAddFile = () => {
     const newFile = { lang: "python3", code: `print("Welcome to Codetantra")` };
     setFiles([...files, newFile]);
     setActiveTab(files.length);
-    setInput(""); // Clear input for new file
-    setOutput(""); // Clear output for new file
+    setInput("");
+    setOutput("");
   };
 
   const handleDeleteFile = (index) => {
@@ -71,8 +71,8 @@ function Editor() {
       const updatedFiles = files.filter((_, i) => i !== index);
       setFiles(updatedFiles);
       setActiveTab(Math.max(0, activeTab - 1));
-      setInput(""); // Clear input after file deletion
-      setOutput(""); // Clear output after file deletion
+      setInput("");
+      setOutput("");
     }
   };
 
@@ -89,8 +89,7 @@ function Editor() {
       newLang === "python3"
         ? `print("Welcome to Codetantra")`
         : newLang === "java"
-        ? `import java.util.*;
-        class Main {
+        ? `class Main {
     public static void main(String[] args) {
         System.out.println("Welcome to Codetantra");
     }
@@ -135,9 +134,9 @@ int main() {
   };
 
   const handleClear = () => {
-    updateCode(""); // Reset code
-    setInput(""); // Clear input
-    setOutput(""); // Clear output
+    updateCode("");
+    setInput("");
+    setOutput("");
   };
 
   const handleDownloadCode = () => {
@@ -152,127 +151,115 @@ int main() {
   };
 
   return (
-    <>
-      <Box
-        sx={{
-          height: "100vh",
-          display: "grid",
-          gridTemplateRows: "auto 1fr",
-          overflow: "hidden",
-        }}
+    <Box
+      sx={{
+        height: "100vh",
+        display: "grid",
+        gridTemplateRows: "auto 1fr",
+        overflow: "hidden", // Prevent scrolling
+      }}
+    >
+      <Tabs
+        value={activeTab}
+        onChange={handleTabChange}
+        variant="scrollable"
+        scrollButtons="auto"
       >
-        <Tabs
-          value={activeTab}
-          onChange={handleTabChange}
-          variant="scrollable"
-          scrollButtons="auto"
-        >
-          {files.map((file, index) => (
-            <Tab
-              key={index}
-              label={`File ${index + 1}`}
-              onDoubleClick={() => handleDeleteFile(index)}
-            />
-          ))}
-          <Button onClick={handleAddFile} sx={{ minWidth: "2rem", color: "primary.main" }}>
-            +
-          </Button>
-        </Tabs>
+        {files.map((file, index) => (
+          <Tab
+            key={index}
+            label={`File ${index + 1}`}
+            onDoubleClick={() => handleDeleteFile(index)}
+          />
+        ))}
+        <Button onClick={handleAddFile} sx={{ minWidth: "2rem", color: "primary.main" }}>
+          +
+        </Button>
+      </Tabs>
 
-        <Box sx={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: 2 }}>
-          <AceEditor
-            mode={editorLang}
-            theme="dracula"
-            name={`editor-${activeTab}`}
-            onChange={updateCode}
-            value={currentFile.code}
-            fontSize={16}
-            showPrintMargin={false}
-            showGutter={true}
-            highlightActiveLine={true}
-            setOptions={{
-              enableBasicAutocompletion: true,
-              enableLiveAutocompletion: true,
-              enableSnippets: true,
-            }}
-            style={{
-              height: "calc(100vh - 48px)",
-              width: "100%",
-              backgroundColor: editorBackgroundColor,
+      <Box sx={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: 2 }}>
+        <AceEditor
+          mode={editorLang}
+          theme="dracula"
+          name={`editor-${activeTab}`}
+          onChange={updateCode}
+          value={currentFile.code}
+          fontSize={16}
+          style={{
+            height: "calc(100vh - 48px)",
+            width: "100%",
+            backgroundColor: editorBackgroundColor,
+          }}
+        />
+
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            backgroundColor: "#f5f5f5", // Light white background for non-editor fields
+            padding: 2,
+            borderRadius: 1,
+            height: "calc(100vh - 48px)",
+          }}
+        >
+          <Select
+            value={currentFile.lang}
+            onChange={(e) => updateLanguage(e.target.value)}
+            disabled={executing}
+            sx={{
+              backgroundColor: dropdownBackground,
               color: textColor,
+              borderRadius: 1,
+            }}
+          >
+            <MenuItem value="python3">Python</MenuItem>
+            <MenuItem value="c">C</MenuItem>
+            <MenuItem value="cpp">C++</MenuItem>
+            <MenuItem value="java">Java</MenuItem>
+          </Select>
+
+          <Button variant="contained" onClick={createRequest} startIcon={<PlayArrowRoundedIcon />} disabled={executing}>
+            Run
+          </Button>
+          <Button variant="contained" onClick={handleClear} startIcon={<RefreshIcon />}>
+            Clear
+          </Button>
+          <Button variant="contained" onClick={handleDownloadCode} startIcon={<DownloadIcon />}>
+            Download
+          </Button>
+
+          {executing && <LinearProgress />}
+
+          <InputLabel sx={{ color: inputOutputTextColor }}>Input</InputLabel>
+          <TextField
+            multiline
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            rows={5}
+            sx={{
+              backgroundColor: inputOutputBackground,
+              color: inputOutputTextColor,
+              borderRadius: 1,
             }}
           />
 
+          <InputLabel sx={{ color: inputOutputTextColor }}>Output</InputLabel>
           <Box
             sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 2,
-              height: "calc(100vh - 48px)",
+              backgroundColor: inputOutputBackground,
+              color: inputOutputTextColor,
+              padding: 2,
+              borderRadius: 1,
+              height: "30%",
               overflowY: "auto",
             }}
           >
-            <Select
-              value={currentFile.lang}
-              onChange={(e) => updateLanguage(e.target.value)}
-              disabled={executing}
-              sx={{
-                backgroundColor: dropdownBackground,
-                color: textColor,
-                borderRadius: 1,
-                marginBottom: "1rem",
-              }}
-            >
-              <MenuItem value="python3">Python</MenuItem>
-              <MenuItem value="c">C</MenuItem>
-              <MenuItem value="cpp">C++</MenuItem>
-              <MenuItem value="java">Java</MenuItem>
-            </Select>
-
-            <Button variant="contained" onClick={createRequest} startIcon={<PlayArrowRoundedIcon />} disabled={executing}>
-              Run
-            </Button>
-            <Button variant="contained" onClick={handleClear} startIcon={<RefreshIcon />}>
-              Clear
-            </Button>
-            <Button variant="contained" onClick={handleDownloadCode} startIcon={<DownloadIcon />}>
-              Download
-            </Button>
-
-            {executing && <LinearProgress />}
-
-            <InputLabel sx={{ color: textColor }}>Input</InputLabel>
-            <TextField
-              multiline
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              rows={5}
-              variant="outlined"
-              sx={{
-                backgroundColor: inputOutputBackground,
-                color: inputOutputTextColor,
-                borderRadius: 1,
-              }}
-            />
-
-            <InputLabel sx={{ color: textColor }}>Output</InputLabel>
-            <Box
-              sx={{
-                backgroundColor: inputOutputBackground,
-                color: inputOutputTextColor,
-                padding: 2,
-                overflowY: "auto",
-                whiteSpace: "pre-line",
-                borderRadius: 1,
-                height: "30%",
-              }}
-            >
-              {output}
-            </Box>
+            {output}
           </Box>
         </Box>
       </Box>
-    </>
+    </Box>
   );
 }
 
