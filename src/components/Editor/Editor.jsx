@@ -21,7 +21,7 @@ import "ace-builds/src-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/mode-c_cpp";
 import "ace-builds/src-noconflict/mode-java";
 import "ace-builds/src-noconflict/mode-python";
-import "ace-builds/src-noconflict/theme-dracula";
+import "ace-builds/src-noconflict/theme-chrome"; // Or use "theme-github"
 
 function Editor() {
   const [activeTab, setActiveTab] = useState(0);
