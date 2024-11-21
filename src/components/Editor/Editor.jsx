@@ -38,8 +38,9 @@ function Editor() {
   // Colors based on theme
   const editorBackgroundColor = isDarkTheme ? "#1e1e1e" : "#ffffff";
   const textColor = isDarkTheme ? "#f8f8f2" : "#333";
-  const inputOutputBackground = isDarkTheme ? "#2d2d2d" : "#f0f0f0";
+  const inputOutputBackground = isDarkTheme ? "#2d2d2d" : "#ffffff";
   const dropdownBackground = isDarkTheme ? "#3a3f44" : "#ffffff";
+  const inputOutputTextColor = isDarkTheme ? "#f8f8f2" : "#333";
 
   const languageMap = {
     cpp: "c_cpp",
@@ -88,7 +89,8 @@ function Editor() {
       newLang === "python3"
         ? `print("Welcome to Codetantra")`
         : newLang === "java"
-        ? `class Main {
+        ? `import java.util.*;
+        class Main {
     public static void main(String[] args) {
         System.out.println("Welcome to Codetantra");
     }
@@ -218,6 +220,7 @@ int main() {
                 backgroundColor: dropdownBackground,
                 color: textColor,
                 borderRadius: 1,
+                marginBottom: "1rem",
               }}
             >
               <MenuItem value="python3">Python</MenuItem>
@@ -247,7 +250,7 @@ int main() {
               variant="outlined"
               sx={{
                 backgroundColor: inputOutputBackground,
-                color: textColor,
+                color: inputOutputTextColor,
                 borderRadius: 1,
               }}
             />
@@ -256,7 +259,7 @@ int main() {
             <Box
               sx={{
                 backgroundColor: inputOutputBackground,
-                color: textColor,
+                color: inputOutputTextColor,
                 padding: 2,
                 overflowY: "auto",
                 whiteSpace: "pre-line",
