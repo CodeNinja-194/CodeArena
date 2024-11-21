@@ -41,7 +41,7 @@ function Editor() {
 
   const editorBackgroundColor = isDarkTheme ? "#f5f5f5" : "#ffffff";
   const textColor = "#333"; // Uniform text color
-  const inputOutputBackground = "#f5f5f5"; // Old-style input/output background
+  const inputOutputBackground = "#ffffff"; // White background for non-editor fields
 
   const languageMap = {
     cpp: "c_cpp",
@@ -270,7 +270,13 @@ int main() {
             </RadioGroup>
           </FormControl>
 
-          <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 1,
+            }}
+          >
             <Button
               variant="contained"
               onClick={createRequest}
@@ -306,8 +312,8 @@ int main() {
               startIcon={<DownloadIcon />}
               size="small"
               sx={{
-                backgroundColor: "#d32f2f", // Red background for download
-                "&:hover": { backgroundColor: "#c62828" },
+                backgroundColor: "#1976d2", // Blue color for download
+                "&:hover": { backgroundColor: "#1565c0" },
               }}
             >
               Download
@@ -315,32 +321,22 @@ int main() {
           </Box>
 
           {executing && <LinearProgress />}
+          
+          {/* Changed Input and Output Fields */}
           <TextField
             label="Input"
             variant="outlined"
-            multiline
-            rows={4}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            sx={{
-              flex: 1,
-              backgroundColor: "#ffffff",
-              border: "1px solid #ccc", // Border to make it look more traditional
-              borderRadius: "4px",
-            }}
+            sx={{ backgroundColor: "#f5f5f5" }}
           />
           <TextField
             label="Output"
             variant="outlined"
-            multiline
-            rows={4}
             value={currentFile.output}
             disabled
             sx={{
-              flex: 1,
-              backgroundColor: inputOutputBackground,
-              border: "1px solid #ccc",
-              borderRadius: "4px",
+              backgroundColor: "#f5f5f5",
             }}
           />
         </Box>
