@@ -4,13 +4,15 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import {
   Box,
   Button,
-  InputLabel,
+  FormControl,
+  FormControlLabel,
   LinearProgress,
-  MenuItem,
-  Select,
+  Radio,
+  RadioGroup,
   Tab,
   Tabs,
   TextField,
+  InputLabel,
   useTheme,
 } from "@mui/material";
 import { useState } from "react";
@@ -40,8 +42,6 @@ function Editor() {
   const textColor = "#333"; // Uniform text color for light themes
   const inputOutputBackground = "#ffffff"; // White background for non-editor fields
   const inputOutputBorder = "#ccc"; // Subtle border for input/output
-  const dropdownBackground = "#ffffff"; // White dropdown for clarity
-  const dropdownTextColor = "#333";
 
   const languageMap = {
     cpp: "c_cpp",
@@ -83,60 +83,34 @@ function Editor() {
     setFiles(updatedFiles);
   };
 
-//   const updateLanguage = (newLang) => {
-//     const updatedFiles = [...files];
-//     updatedFiles[activeTab].lang = newLang;
-//     updatedFiles[activeTab].code =
-//       newLang === "python3"
-//         ? `print("Welcome to Codetantra")`
-//         : newLang === "java"
-//         ? `import java.util.*;
-//         class Main {
-//     public static void main(String[] args) {
-//         System.out.println("Welcome to Codetantra");
-//     }
-// }`
-//         : newLang === "cpp"
-//         ? `#include <iostream>
-// using namespace std;
-// int main() {
-//     cout << "Welcome to Codetantra";
-//     return 0;
-// }`
-//         : `#include <stdio.h>
-// int main() {
-//     printf("Welcome to Codetantra");
-//     return 0;
-// }`;
-//     setFiles(updatedFiles);
-//   };
-const updateLanguage = (newLang) => {
-  const updatedFiles = [...files];
-  updatedFiles[activeTab].lang = newLang;
-  updatedFiles[activeTab].code =
-    newLang === "python3"
-      ? `print("Welcome to Codetantra")`
-      : newLang === "java"
-      ? `import java.util.*;
+  const updateLanguage = (newLang) => {
+    const updatedFiles = [...files];
+    updatedFiles[activeTab].lang = newLang;
+    updatedFiles[activeTab].code =
+      newLang === "python3"
+        ? `print("Welcome to Codetantra")`
+        : newLang === "java"
+        ? `import java.util.*;
 class Main {
     public static void main(String[] args) {
         System.out.println("Welcome to Codetantra");
     }
 }`
-      : newLang === "cpp"
-      ? `#include <iostream>
+        : newLang === "cpp"
+        ? `#include <iostream>
 using namespace std;
 int main() {
     cout << "Welcome to Codetantra";
     return 0;
 }`
-      : `#include <stdio.h>
+        : `#include <stdio.h>
 int main() {
     printf("Welcome to Codetantra");
     return 0;
 }`;
-  setFiles(updatedFiles);
-};
+    setFiles(updatedFiles);
+  };
+
   const createRequest = async () => {
     try {
       setExecuting(true);
@@ -182,10 +156,8 @@ int main() {
     <Box
       sx={{
         height: "100vh",
-        backgroundColor: inputOutputBackground, // White background for non-editor areas
         display: "grid",
         gridTemplateRows: "auto 1fr",
-        overflow: "hidden", // Prevent scrolling
       }}
     >
       <Tabs
@@ -230,30 +202,41 @@ int main() {
             overflowY: "auto",
           }}
         >
-          <Select
-            value={currentFile.lang}
-            onChange={(e) => updateLanguage(e.target.value)}
-            disabled={executing}
-            sx={{
-              backgroundColor: dropdownBackground,
-              color: dropdownTextColor,
-              borderRadius: 1,
-              border: `1px solid ${inputOutputBorder}`,
-            }}
-          >
-            <MenuItem value="python3">Python</MenuItem>
-            <MenuItem value="c">C</MenuItem>
-            <MenuItem value="cpp">C++</MenuItem>
-            <MenuItem value="java">Java</MenuItem>
-          </Select>
+          <FormControl component="fieldset">
+            <RadioGroup
+              value={currentFile.lang}
+              onChange={(e) => updateLanguage(e.target.value)}
+            >
+              <FormControlLabel value="python3" control={<Radio />} label="Python" />
+              <FormControlLabel value="c" control={<Radio />} label="C" />
+              <FormControlLabel value="cpp" control={<Radio />} label="C++" />
+              <FormControlLabel value="java" control={<Radio />} label="Java" />
+            </RadioGroup>
+          </FormControl>
 
-          <Button variant="contained" onClick={createRequest} startIcon={<PlayArrowRoundedIcon />} disabled={executing}>
+          <Button
+            variant="contained"
+            size="small"
+            onClick={createRequest}
+            startIcon={<PlayArrowRoundedIcon />}
+            disabled={executing}
+          >
             Run
           </Button>
-          <Button variant="contained" onClick={handleClear} startIcon={<RefreshIcon />}>
+          <Button
+            variant="contained"
+            size="small"
+            onClick={handleClear}
+            startIcon={<RefreshIcon />}
+          >
             Clear
           </Button>
-          <Button variant="contained" onClick={handleDownloadCode} startIcon={<DownloadIcon />}>
+          <Button
+            variant="contained"
+            size="small"
+            onClick={handleDownloadCode}
+            startIcon={<DownloadIcon />}
+          >
             Download
           </Button>
 
