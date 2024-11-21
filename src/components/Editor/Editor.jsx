@@ -13,7 +13,7 @@ import {
   TextField,
   useTheme,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import AceEditor from "react-ace";
 import { saveAs } from "file-saver";
 
@@ -26,22 +26,22 @@ import "ace-builds/src-noconflict/theme-chrome"; // Light theme for Ace Editor
 function Editor() {
   const [activeTab, setActiveTab] = useState(0);
   const [files, setFiles] = useState([
-    { lang: "python3", code: print("Welcome to Codetantra") },
+    { lang: "python3", code: `print("Welcome to Codetantra")` },
   ]);
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
   const [executing, setExecuting] = useState(false);
 
-  const theme = useTheme(); // Get the current theme
+  const theme = useTheme(); // Material-UI theme
   const isDarkTheme = theme.palette.mode === "dark";
 
-  // Colors based on theme
+  // Colors based on the theme
   const editorBackgroundColor = isDarkTheme ? "#f5f5f5" : "#ffffff";
-  const textColor = isDarkTheme ? "#333" : "#333";
-  const inputOutputBackground = isDarkTheme ? "#ffffff" : "#f9f9f9";
-  const inputOutputBorder = isDarkTheme ? "#ccc" : "#ddd";
-  const dropdownBackground = isDarkTheme ? "#ffffff" : "#f9f9f9";
-  const dropdownTextColor = isDarkTheme ? "#333" : "#333";
+  const textColor = "#333"; // Uniform text color for light themes
+  const inputOutputBackground = "#ffffff"; // White background for non-editor fields
+  const inputOutputBorder = "#ccc"; // Subtle border for input/output
+  const dropdownBackground = "#ffffff"; // White dropdown for clarity
+  const dropdownTextColor = "#333";
 
   const languageMap = {
     cpp: "c_cpp",
@@ -55,16 +55,16 @@ function Editor() {
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
-    setOutput(""); // Clear output
-    setInput(""); // Clear input
+    setOutput("");
+    setInput("");
   };
 
   const handleAddFile = () => {
-    const newFile = { lang: "python3", code: print("Welcome to Codetantra") };
+    const newFile = { lang: "python3", code: `print("Welcome to Codetantra")` };
     setFiles([...files, newFile]);
     setActiveTab(files.length);
-    setInput(""); // Clear input for new file
-    setOutput(""); // Clear output for new file
+    setInput("");
+    setOutput("");
   };
 
   const handleDeleteFile = (index) => {
@@ -72,8 +72,8 @@ function Editor() {
       const updatedFiles = files.filter((_, i) => i !== index);
       setFiles(updatedFiles);
       setActiveTab(Math.max(0, activeTab - 1));
-      setInput(""); // Clear input after file deletion
-      setOutput(""); // Clear output after file deletion
+      setInput("");
+      setOutput("");
     }
   };
 
@@ -88,26 +88,26 @@ function Editor() {
     updatedFiles[activeTab].lang = newLang;
     updatedFiles[activeTab].code =
       newLang === "python3"
-        ? print("Welcome to Codetantra")
+        ? `print("Welcome to Codetantra")`
         : newLang === "java"
-        ? import java.util.*;
+        ? `import java.util.*;
         class Main {
     public static void main(String[] args) {
         System.out.println("Welcome to Codetantra");
     }
-}
+}`
         : newLang === "cpp"
-        ? #include <iostream>
+        ? `#include <iostream>
 using namespace std;
 int main() {
     cout << "Welcome to Codetantra";
     return 0;
-}
-        : #include <stdio.h>
+}`
+        : `#include <stdio.h>
 int main() {
     printf("Welcome to Codetantra");
     return 0;
-};
+}`;
     setFiles(updatedFiles);
   };
 
@@ -136,9 +136,9 @@ int main() {
   };
 
   const handleClear = () => {
-    updateCode(""); // Reset code
-    setInput(""); // Clear input
-    setOutput(""); // Clear output
+    updateCode("");
+    setInput("");
+    setOutput("");
   };
 
   const handleDownloadCode = () => {
@@ -149,124 +149,123 @@ int main() {
       c: "c",
     };
     const blob = new Blob([currentFile.code], { type: "text/plain;charset=utf-8" });
-    saveAs(blob, code.${languageArrayExtension[currentFile.lang]});
+    saveAs(blob, `code.${languageArrayExtension[currentFile.lang]}`);
   };
 
   return (
-    <>
-      <Box
-        sx={{
-          height: "100vh",
-          display: "grid",
-          gridTemplateRows: "auto 1fr",
-          overflow: "hidden", // Prevent scrolling
-        }}
+    <Box
+      sx={{
+        height: "100vh",
+        backgroundColor: inputOutputBackground, // White background for non-editor areas
+        display: "grid",
+        gridTemplateRows: "auto 1fr",
+        overflow: "hidden", // Prevent scrolling
+      }}
+    >
+      <Tabs
+        value={activeTab}
+        onChange={handleTabChange}
+        variant="scrollable"
+        scrollButtons="auto"
       >
-        <Tabs
-          value={activeTab}
-          onChange={handleTabChange}
-          variant="scrollable"
-          scrollButtons="auto"
-        >
-          {files.map((file, index) => (
-            <Tab
-              key={index}
-              label={File ${index + 1}}
-              onDoubleClick={() => handleDeleteFile(index)}
-            />
-          ))}
-          <Button onClick={handleAddFile} sx={{ minWidth: "2rem", color: "primary.main" }}>
-            +
-          </Button>
-        </Tabs>
+        {files.map((file, index) => (
+          <Tab
+            key={index}
+            label={`File ${index + 1}`}
+            onDoubleClick={() => handleDeleteFile(index)}
+          />
+        ))}
+        <Button onClick={handleAddFile} sx={{ minWidth: "2rem", color: "primary.main" }}>
+          +
+        </Button>
+      </Tabs>
 
-        <Box sx={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: 2 }}>
-          <AceEditor
-            mode={editorLang}
-            theme="chrome" // Light theme
-            name={editor-${activeTab}}
-            onChange={updateCode}
-            value={currentFile.code}
-            fontSize={16}
-            style={{
-              height: "calc(100vh - 48px)",
-              width: "100%",
-              backgroundColor: editorBackgroundColor,
+      <Box sx={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: 2 }}>
+        <AceEditor
+          mode={editorLang}
+          theme="chrome"
+          name={`editor-${activeTab}`}
+          onChange={updateCode}
+          value={currentFile.code}
+          fontSize={16}
+          style={{
+            height: "calc(100vh - 48px)",
+            width: "100%",
+            backgroundColor: editorBackgroundColor,
+          }}
+        />
+
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            height: "calc(100vh - 48px)",
+            overflowY: "auto",
+          }}
+        >
+          <Select
+            value={currentFile.lang}
+            onChange={(e) => updateLanguage(e.target.value)}
+            disabled={executing}
+            sx={{
+              backgroundColor: dropdownBackground,
+              color: dropdownTextColor,
+              borderRadius: 1,
+              border: `1px solid ${inputOutputBorder}`,
+            }}
+          >
+            <MenuItem value="python3">Python</MenuItem>
+            <MenuItem value="c">C</MenuItem>
+            <MenuItem value="cpp">C++</MenuItem>
+            <MenuItem value="java">Java</MenuItem>
+          </Select>
+
+          <Button variant="contained" onClick={createRequest} startIcon={<PlayArrowRoundedIcon />} disabled={executing}>
+            Run
+          </Button>
+          <Button variant="contained" onClick={handleClear} startIcon={<RefreshIcon />}>
+            Clear
+          </Button>
+          <Button variant="contained" onClick={handleDownloadCode} startIcon={<DownloadIcon />}>
+            Download
+          </Button>
+
+          {executing && <LinearProgress />}
+
+          <InputLabel sx={{ color: textColor }}>Input</InputLabel>
+          <TextField
+            multiline
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            rows={5}
+            variant="outlined"
+            sx={{
+              backgroundColor: inputOutputBackground,
+              color: textColor,
+              borderRadius: 1,
+              border: `1px solid ${inputOutputBorder}`,
             }}
           />
 
+          <InputLabel sx={{ color: textColor }}>Output</InputLabel>
           <Box
             sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 2,
-              height: "calc(100vh - 48px)",
+              backgroundColor: inputOutputBackground,
+              color: textColor,
+              padding: 2,
               overflowY: "auto",
+              whiteSpace: "pre-line",
+              borderRadius: 1,
+              border: `1px solid ${inputOutputBorder}`,
+              height: "30%",
             }}
           >
-            <Select
-              value={currentFile.lang}
-              onChange={(e) => updateLanguage(e.target.value)}
-              disabled={executing}
-              sx={{
-                backgroundColor: dropdownBackground,
-                color: dropdownTextColor,
-                borderRadius: 1,
-                marginBottom: "1rem",
-                border: 1px solid ${inputOutputBorder},
-              }}
-            >
-              <MenuItem value="python3">Python</MenuItem>
-              <MenuItem value="c">C</MenuItem>
-              <MenuItem value="cpp">C++</MenuItem>
-              <MenuItem value="java">Java</MenuItem>
-            </Select>
-
-            <Button variant="contained" onClick={createRequest} startIcon={<PlayArrowRoundedIcon />} disabled={executing}>
-              Run
-            </Button>
-            <Button variant="contained" onClick={handleClear} startIcon={<RefreshIcon />}>
-              Clear
-            </Button>
-            <Button variant="contained" onClick={handleDownloadCode} startIcon={<DownloadIcon />}>
-              Download
-            </Button>
-
-            {executing && <LinearProgress />}
-                      <InputLabel sx={{ color: textColor }}>Input</InputLabel>
-            <TextField
-              multiline
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              rows={5}
-              variant="outlined"
-              sx={{
-                backgroundColor: inputOutputBackground,
-                color: textColor,
-                borderRadius: 1,
-                border: `1px solid ${inputOutputBorder}`,
-              }}
-            />
-
-            <InputLabel sx={{ color: textColor }}>Output</InputLabel>
-            <Box
-              sx={{
-                backgroundColor: inputOutputBackground,
-                color: textColor,
-                padding: 2,
-                overflowY: "auto",
-                whiteSpace: "pre-line",
-                borderRadius: 1,
-                border: `1px solid ${inputOutputBorder}`,
-                height: "30%",
-              }}
-            >
-              {output}
-            </Box>
+            {output}
           </Box>
         </Box>
       </Box>
-    </>
+    </Box>
   );
 }
 
