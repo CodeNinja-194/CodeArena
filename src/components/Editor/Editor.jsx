@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import AceEditor from "react-ace";
-import { saveAs } from "file-saver";
+import DownloadIcon from "@mui/icons-material/CloudDownload";
+import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import {
   Box,
   Button,
@@ -8,205 +8,257 @@ import {
   LinearProgress,
   MenuItem,
   Select,
+  Tab,
+  Tabs,
   TextField,
 } from "@mui/material";
-import {
-  CloudDownload as DownloadIcon,
-  FileCopy as CopyIcon,
-  PlayArrowRounded as RunIcon,
-  Refresh as ClearIcon,
-} from "@mui/icons-material";
+import { useEffect, useState } from "react";
+import AceEditor from "react-ace";
+import { saveAs } from "file-saver";
 
-import ace from "ace-builds";
 import "ace-builds/src-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/mode-c_cpp";
 import "ace-builds/src-noconflict/mode-java";
 import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/theme-dracula";
 
-// ACE editor configuration
-ace.config.set(
-  "basePath",
-  "https://cdn.jsdelivr.net/npm/ace-builds@1.4.3/src-noconflict/"
-);
-ace.config.setModuleUrl(
-  "ace/mode/javascript_worker",
-  "https://cdn.jsdelivr.net/npm/ace-builds@1.4.3/src-noconflict/worker-javascript.js"
-);
+function Editor() {
+  const [activeTab, setActiveTab] = useState(0); // Track the active tab
+  const [files, setFiles] = useState([
+    { lang: "python3", code: `print("Welcome to Codetantra")` },
+  ]); // Default file
+  const [input, setInput] = useState("");
+  const [output, setOutput] = useState("");
+  const [executing, setExecuting] = useState(false);
 
-const defaultCode = {
-  python3: `print("Welcome to Codetantra")`,
-  c: `#include <stdio.h>
-int main() {
-    printf("Welcome to Codetantra");
-    return 0;
-}`,
-  cpp: `#include <iostream>
+  // Editor language mapping
+  const languageMap = {
+    cpp: "c_cpp",
+    c: "c_cpp",
+    java: "java",
+    python3: "python",
+  };
+
+  // Get the current file
+  const currentFile = files[activeTab] || {};
+  const editorLang = languageMap[currentFile.lang] || "python";
+
+  // Handle tab change
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+    setOutput(""); // Clear output when switching tabs
+  };
+
+  // Add a new file
+  const handleAddFile = () => {
+    setFiles([
+      ...files,
+      { lang: "python3", code: `print("Welcome to Codetantra")` }, // Default Python code
+    ]);
+    setActiveTab(files.length); // Switch to the newly added tab
+  };
+
+  // Delete a file
+  const handleDeleteFile = (index) => {
+    if (files.length > 1) {
+      const updatedFiles = files.filter((_, i) => i !== index);
+      setFiles(updatedFiles);
+      setActiveTab(Math.max(0, activeTab - 1)); // Adjust active tab
+    }
+  };
+
+  // Update code for the current tab
+  const updateCode = (newCode) => {
+    const updatedFiles = [...files];
+    updatedFiles[activeTab].code = newCode;
+    setFiles(updatedFiles);
+  };
+
+  // Update language for the current tab
+  const updateLanguage = (newLang) => {
+    const updatedFiles = [...files];
+    updatedFiles[activeTab].lang = newLang;
+    updatedFiles[activeTab].code =
+      newLang === "python3"
+        ? `print("Welcome to Codetantra")`
+        : newLang === "java"
+        ? `class Main {
+    public static void main(String[] args) {
+        System.out.println("Welcome to Codetantra");
+    }
+}`
+        : newLang === "cpp"
+        ? `#include <iostream>
 using namespace std;
 int main() {
     cout << "Welcome to Codetantra";
     return 0;
-}`,
-  java: `class Main {
-    public static void main(String[] args) {
-        System.out.println("Welcome to Codetantra");
-    }
-}`,
-};
-
-function Editor() {
-  const [code, setCode] = useState(defaultCode.python3);
-  const [input, setInput] = useState("");
-  const [output, setOutput] = useState("");
-  const [lang, setLang] = useState("python3");
-  const [editorLang, setEditorLang] = useState("python");
-  const [executing, setExecuting] = useState(false);
-
-  useEffect(() => {
-    switch (lang) {
-      case "cpp":
-      case "c":
-        setEditorLang("c_cpp");
-        break;
-      case "java":
-        setEditorLang("java");
-        break;
-      default:
-        setEditorLang("python");
-    }
-    setCode(defaultCode[lang]);
-  }, [lang]);
-
-  const handleCopyCode = () => navigator.clipboard.writeText(code);
-  const handleDownloadCode = () => {
-    const extensions = { python3: "py", c: "c", cpp: "cpp", java: "java" };
-    const blob = new Blob([code], { type: "text/plain;charset=utf-8" });
-    saveAs(blob, `code.${extensions[lang]}`);
+}`
+        : `#include <stdio.h>
+int main() {
+    printf("Welcome to Codetantra");
+    return 0;
+}`; // Reset code based on language
+    setFiles(updatedFiles);
   };
 
-  const handleClear = () => {
-    setCode(defaultCode.python3);
-    setInput("");
-    setOutput("");
-  };
-
+  // Run the code
   const createRequest = async () => {
-    setExecuting(true);
     try {
-      const response = await fetch("https://code-box.onrender.com/api/v1/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ src: code, lang, stdin: input }),
-      });
+      setExecuting(true);
+      const response = await fetch(
+        "https://code-box.onrender.com/api/v1/submit",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            src: currentFile.code,
+            lang: currentFile.lang,
+            stdin: input,
+          }),
+        }
+      );
       const result = await response.json();
-      setOutput(result.data.output || result.data.error || "Error occurred");
-    } catch (err) {
+      setOutput(result.data?.output || result.data?.error || "Error occurred");
+      setExecuting(false);
+    } catch (error) {
       setOutput("Network Error or Server Down");
-    } finally {
       setExecuting(false);
     }
   };
 
+  // Clear the editor and output
+  const handleClear = () => {
+    updateCode("");
+    setInput("");
+    setOutput("");
+  };
+
+  // Download the code
+  const handleDownloadCode = () => {
+    const languageArrayExtension = {
+      java: "java",
+      python3: "py",
+      cpp: "cpp",
+      c: "c",
+    };
+    const blob = new Blob([currentFile.code], { type: "text/plain;charset=utf-8" });
+    saveAs(blob, `code.${languageArrayExtension[currentFile.lang]}`);
+  };
+
   return (
-    <Box
-      backgroundColor="background.default"
-      sx={{
-        display: "grid",
-        gridTemplateColumns: "9fr 3fr",
-        height: "100vh",
-        gap: 2,
-      }}
-    >
-      {/* Code Editor */}
-      <AceEditor
-        mode={editorLang}
-        theme="dracula"
-        value={code}
-        onChange={setCode}
-        fontSize={17}
-        showPrintMargin={false}
-        style={{ width: "100%", height: "100%" }}
-        setOptions={{
-          enableBasicAutocompletion: true,
-          enableLiveAutocompletion: true,
-          enableSnippets: true,
-          showLineNumbers: true,
-        }}
-      />
-
-      {/* Side Panel */}
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        {/* Language Selector and Buttons */}
-        <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-          <Select
-            value={lang}
-            onChange={(e) => setLang(e.target.value)}
-            disabled={executing}
-            sx={{ minWidth: 120 }}
-          >
-            <MenuItem value="python3">Python</MenuItem>
-            <MenuItem value="c">C</MenuItem>
-            <MenuItem value="cpp">C++</MenuItem>
-            <MenuItem value="java">Java</MenuItem>
-          </Select>
+    <>
+      <Box sx={{ height: "100vh", display: "grid", gridTemplateRows: "auto 1fr" }}>
+        {/* Tabs for switching between files */}
+        <Tabs
+          value={activeTab}
+          onChange={handleTabChange}
+          variant="scrollable"
+          scrollButtons="auto"
+        >
+          {files.map((file, index) => (
+            <Tab
+              key={index}
+              label={`File ${index + 1}`}
+              onDoubleClick={() => handleDeleteFile(index)} // Delete on double-click
+            />
+          ))}
           <Button
-            variant="contained"
-            startIcon={<RunIcon />}
-            onClick={createRequest}
-            disabled={executing}
+            onClick={handleAddFile}
+            sx={{ minWidth: "2rem", color: "primary.main" }}
           >
-            Run
+            +
           </Button>
-          <Button variant="contained" startIcon={<ClearIcon />} onClick={handleClear}>
-            Clear
-          </Button>
-        </Box>
+        </Tabs>
 
-        {/* Copy and Download Buttons */}
-        <Box sx={{ display: "flex", gap: 2 }}>
-          <Button variant="contained" startIcon={<CopyIcon />} onClick={handleCopyCode}>
-            Copy
-          </Button>
-          <Button variant="contained" startIcon={<DownloadIcon />} onClick={handleDownloadCode}>
-            Download
-          </Button>
-        </Box>
-
-        {/* Progress Indicator */}
-        {executing && <LinearProgress />}
-
-        {/* Input Section */}
-        <Box>
-          <InputLabel>Input</InputLabel>
-          <TextField
-            multiline
-            rows={5}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            sx={{ width: "100%", backgroundColor: "background.paper" }}
-          />
-        </Box>
-
-        {/* Output Section */}
-        <Box>
-          <InputLabel>Output</InputLabel>
-          <Box
-            sx={{
-              backgroundColor: "background.paper",
-              color: "text.primary",
-              padding: 2,
-              borderRadius: 1,
-              height: "30%",
-              overflowY: "auto",
-              whiteSpace: "pre-wrap",
-              fontFamily: "monospace",
+        {/* Main Editor and Controls */}
+        <Box sx={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: 2 }}>
+          {/* Editor */}
+          <AceEditor
+            mode={editorLang}
+            theme="dracula"
+            name={`editor-${activeTab}`}
+            onChange={updateCode}
+            value={currentFile.code}
+            fontSize={16}
+            showPrintMargin={false}
+            showGutter={true}
+            highlightActiveLine={true}
+            setOptions={{
+              enableBasicAutocompletion: true,
+              enableLiveAutocompletion: true,
+              enableSnippets: true,
             }}
-          >
-            {output}
+            style={{ height: "calc(100vh - 48px)", width: "100%" }}
+          />
+
+          {/* Sidebar with controls */}
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            {/* Language Selector */}
+            <Select
+              value={currentFile.lang}
+              onChange={(e) => updateLanguage(e.target.value)}
+              disabled={executing}
+            >
+              <MenuItem value="python3">Python</MenuItem>
+              <MenuItem value="c">C</MenuItem>
+              <MenuItem value="cpp">C++</MenuItem>
+              <MenuItem value="java">Java</MenuItem>
+            </Select>
+
+            {/* Buttons */}
+            <Button
+              variant="contained"
+              onClick={createRequest}
+              startIcon={<PlayArrowRoundedIcon />}
+              disabled={executing}
+            >
+              Run
+            </Button>
+            <Button variant="contained" onClick={handleClear} startIcon={<RefreshIcon />}>
+              Clear
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleDownloadCode}
+              startIcon={<DownloadIcon />}
+            >
+              Download
+            </Button>
+
+            {/* Execution Status */}
+            {executing && <LinearProgress />}
+
+            {/* Input */}
+            <InputLabel>Input</InputLabel>
+            <TextField
+              multiline
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              rows={5}
+              variant="outlined"
+              sx={{ backgroundColor: "#272822", color: "white" }}
+            />
+
+            {/* Output */}
+            <InputLabel>Output</InputLabel>
+            <Box
+              sx={{
+                backgroundColor: "#272822",
+                color: "white",
+                padding: 2,
+                overflowY: "auto",
+                whiteSpace: "pre-line",
+                borderRadius: 1,
+                height: "30%",
+              }}
+            >
+              {output}
+            </Box>
           </Box>
         </Box>
       </Box>
-    </Box>
+    </>
   );
 }
 
