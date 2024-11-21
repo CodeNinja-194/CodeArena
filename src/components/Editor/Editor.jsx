@@ -166,6 +166,16 @@ int main() {
     };
   }, [files, activeTab]);
 
+  // Function to update the file name
+  const handleEditFileName = (index) => {
+    const newFileName = prompt("Enter new file name", files[index].name);
+    if (newFileName) {
+      const updatedFiles = [...files];
+      updatedFiles[index].name = newFileName;
+      setFiles(updatedFiles);
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -191,14 +201,7 @@ int main() {
                 <span style={{ fontSize: "14px" }}>{file.name}</span>
                 <IconButton
                   size="small"
-                  onClick={() => {
-                    const newFileName = prompt("Enter new file name", file.name);
-                    if (newFileName) {
-                      const updatedFiles = [...files];
-                      updatedFiles[activeTab].name = newFileName;
-                      setFiles(updatedFiles);
-                    }
-                  }}
+                  onClick={() => handleEditFileName(index)} // Edit file name on click
                 >
                   <EditIcon fontSize="inherit" />
                 </IconButton>
