@@ -41,7 +41,7 @@ function Editor() {
 
   const editorBackgroundColor = isDarkTheme ? "#f5f5f5" : "#ffffff";
   const textColor = "#333"; // Uniform text color
-  const inputOutputBackground = "#ffffff"; // White background for non-editor fields
+  const inputOutputBackground = "#f5f5f5"; // Old-style input/output background
 
   const languageMap = {
     cpp: "c_cpp",
@@ -270,13 +270,7 @@ int main() {
             </RadioGroup>
           </FormControl>
 
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: 1,
-            }}
-          >
+          <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
             <Button
               variant="contained"
               onClick={createRequest}
@@ -307,14 +301,13 @@ int main() {
               Clear
             </Button>
             <Button
-              variant="outlined"
+              variant="contained"
               onClick={handleDownloadCode}
               startIcon={<DownloadIcon />}
               size="small"
               sx={{
-                color: "#1976d2", // Blue color for download
-                borderColor: "#1976d2",
-                "&:hover": { borderColor: "#1565c0" },
+                backgroundColor: "#d32f2f", // Red background for download
+                "&:hover": { backgroundColor: "#c62828" },
               }}
             >
               Download
@@ -329,7 +322,12 @@ int main() {
             rows={4}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            sx={{ flex: 1 }}
+            sx={{
+              flex: 1,
+              backgroundColor: "#ffffff",
+              border: "1px solid #ccc", // Border to make it look more traditional
+              borderRadius: "4px",
+            }}
           />
           <TextField
             label="Output"
@@ -340,7 +338,9 @@ int main() {
             disabled
             sx={{
               flex: 1,
-              backgroundColor: "#f5f5f5",
+              backgroundColor: inputOutputBackground,
+              border: "1px solid #ccc",
+              borderRadius: "4px",
             }}
           />
         </Box>
