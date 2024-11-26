@@ -12,6 +12,9 @@ import {
   Tabs,
   TextField,
   useTheme,
+  Select,
+  MenuItem,
+  InputLabel,
 } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/CloudDownload";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
@@ -30,10 +33,8 @@ function Editor() {
   const [files, setFiles] = useState([]);
   const [input, setInput] = useState("");
   const [executing, setExecuting] = useState(false);
-
   const theme = useTheme();
   const isDarkTheme = theme.palette.mode === "dark";
-
   const editorBackgroundColor = isDarkTheme ? "#f5f5f5" : "#ffffff";
   const textColor = "#333";
   const inputOutputBackground = "#ffffff";
@@ -54,6 +55,26 @@ function Editor() {
   const currentFile = files[activeTab] || defaultFile;
   const editorLang = languageMap[currentFile.lang] || "python";
 
+  // Code Snippets for each language
+  const codeSnippets = {
+    python: [
+      { caption: "print", value: "print()", description: "Python print statement" },
+      { caption: "for loop", value: "for i in range():\n    pass", description: "Python for loop" },
+      { caption: "def function", value: "def function_name():\n    pass", description: "Python function" },
+      { caption: "if statement", value: "if condition:\n    pass", description: "Python if statement" },
+    ],
+    java: [
+      { caption: "System.out.println", value: "System.out.println();", description: "Java print" },
+      { caption: "for loop", value: "for (int i = 0; i < n; i++) {\n    // your code\n}", description: "Java for loop" },
+      { caption: "public class", value: "public class ClassName {\n    public static void main(String[] args) {\n        // your code\n    }\n}", description: "Java class template" },
+    ],
+    cpp: [
+      { caption: "cout", value: "cout << \"\";", description: "C++ print statement" },
+      { caption: "for loop", value: "for (int i = 0; i < n; i++) {\n    // your code\n}", description: "C++ for loop" },
+      { caption: "int main", value: "int main() {\n    // your code\n    return 0;\n}", description: "C++ main function" },
+    ]
+  };
+
   // Load files and input from localStorage
   useEffect(() => {
     const savedFiles = localStorage.getItem("files");
@@ -73,41 +94,6 @@ function Editor() {
     localStorage.setItem("files", JSON.stringify(files));
     localStorage.setItem("input", input);
   }, [files, input]);
-
-  // Custom completer logic for Python, Java, and C++
-  useEffect(() => {
-    const customCompleter = {
-      getCompletions: (editor, session, pos, prefix, callback) => {
-        const pythonCompletions = [
-          { caption: "print", value: "print()", meta: "Python built-in" },
-          { caption: "def", value: "def function_name():\n    pass", meta: "Function definition" },
-          { caption: "if", value: "if condition:\n    pass", meta: "Condition block" },
-          { caption: "for", value: "for i in range():\n    pass", meta: "Loop structure" },
-        ];
-        const javaCompletions = [
-          { caption: "System.out.println", value: "System.out.println();", meta: "Java print" },
-          { caption: "public class", value: "public class ClassName {\n\n}", meta: "Class template" },
-          { caption: "for loop", value: "for (int i = 0; i < n; i++) {\n\n}", meta: "Loop structure" },
-        ];
-        const cppCompletions = [
-          { caption: "cout", value: "cout << \"\";", meta: "C++ print" },
-          { caption: "#include", value: "#include <iostream>", meta: "Include library" },
-          { caption: "int main", value: "int main() {\n\n    return 0;\n}", meta: "Main function" },
-        ];
-
-        const completions =
-          editorLang === "python"
-            ? pythonCompletions
-            : editorLang === "java"
-            ? javaCompletions
-            : cppCompletions;
-
-        callback(null, completions);
-      },
-    };
-
-    ace.acequire("ace/ext/language_tools").addCompleter(customCompleter);
-  }, [editorLang]);
 
   // Handle Cmd + Enter or Ctrl + Enter to run code
   useEffect(() => {
@@ -159,17 +145,8 @@ function Editor() {
       newLang === "python3"
         ? `print("Welcome to Codetantra")`
         : newLang === "java"
-        ? `class Main {
-    public static void main(String[] args) {
-        System.out.println("Welcome to Codetantra");
-    }
-}`
-        : `#include <iostream>
-using namespace std;
-int main() {
-    cout << "Welcome to Codetantra";
-    return 0;
-}`;
+        ? `import java.util.*;\n    class Main {\n    public static void main(String[] args) {\n        System.out.println("Welcome to Codetantra");\n    }\n}`
+        : `#include <iostream>\nusing namespace std;\nint main() {\n    cout << "Welcome to Codetantra";\n    return 0;\n}`;
     setFiles(updatedFiles);
   };
 
@@ -217,6 +194,13 @@ int main() {
     saveAs(blob, `code.${languageArrayExtension[currentFile.lang]}`);
   };
 
+  // Insert Snippet into the current code
+  const insertSnippet = (snippet) => {
+    const updatedFiles = [...files];
+    updatedFiles[activeTab].code += snippet.value; // Append the snippet
+    setFiles(updatedFiles);
+  };
+
   return (
     <Box
       sx={{
@@ -254,18 +238,27 @@ int main() {
             height: "calc(100vh - 48px)",
             width: "100%",
             backgroundColor: editorBackgroundColor,
+            color: textColor,
           }}
         />
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          {/* Snippet Dropdown */}
+          <FormControl fullWidth>
+            <InputLabel>Insert Snippet</InputLabel>
+            <Select
+              value=""
+              label="Insert Snippet"
+              onChange={(e) => insertSnippet(e.target.value)}
+            >
+              {codeSnippets[editorLang]?.map((snippet, index) => (
+                <MenuItem key={index} value={snippet}>
+                  {snippet.caption} - {snippet.description}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-            height: "calc(100vh - 48px)",
-            overflowY: "auto",
-          }}
-        >
+          {/* Language Selection */}
           <FormControl component="fieldset">
             <FormLabel component="legend" sx={{ color: textColor }}>
               Language
@@ -283,77 +276,48 @@ int main() {
             </RadioGroup>
           </FormControl>
 
+          {/* Buttons */}
           <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
             <Button
+              sx={{ flex: 1 }}
               variant="contained"
+              color="primary"
               onClick={createRequest}
-              startIcon={<PlayArrowRoundedIcon />}
               disabled={executing}
-              size="small"
-              sx={{
-                backgroundColor: "#4caf50",
-                "&:hover": { backgroundColor: "#388e3c" },
-              }}
             >
+              {executing ? <LinearProgress size={24} /> : <PlayArrowRoundedIcon />}
               Run
             </Button>
             <Button
-              variant="contained"
+              sx={{ flex: 1 }}
+              variant="outlined"
               onClick={handleClear}
-              startIcon={<RefreshIcon />}
-              size="small"
-              sx={{
-                backgroundColor: "#ff9800",
-                "&:hover": { backgroundColor: "#f57c00" },
-              }}
             >
+              <RefreshIcon />
               Clear
             </Button>
             <Button
-              variant="contained"
+              sx={{ flex: 1 }}
+              variant="outlined"
               onClick={handleDownloadCode}
-              startIcon={<DownloadIcon />}
-              size="small"
-              sx={{
-                backgroundColor: "#2196f3",
-                "&:hover": { backgroundColor: "#1976d2" },
-              }}
             >
+              <DownloadIcon />
               Download
             </Button>
           </Box>
-
-          {executing && <LinearProgress />}
-
-          <TextField
-            multiline
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            rows={5}
-            variant="outlined"
-            sx={{
-              backgroundColor: inputOutputBackground,
-              color: textColor,
-              borderRadius: 1,
-              border: `1px solid #ccc`,
-            }}
-          />
-
-          <Box
-            sx={{
-              flex: 1,
-              backgroundColor: "#f9f9f9",
-              padding: 2,
-              overflowY: "auto",
-              borderRadius: 1,
-              border: "1px solid #ccc",
-              whiteSpace: "pre-wrap",
-              color: textColor,
-            }}
-          >
-            {currentFile.output || "Output will appear here..."}
-          </Box>
         </Box>
+      </Box>
+
+      <Box
+        sx={{
+          padding: 2,
+          backgroundColor: "#333",
+          color: "#fff",
+          maxHeight: "40vh",
+          overflowY: "auto",
+        }}
+      >
+        <pre>{currentFile.output}</pre>
       </Box>
     </Box>
   );
