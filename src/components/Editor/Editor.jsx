@@ -252,19 +252,20 @@ int main() {
           }}
         >
           <FormControl component="fieldset">
-            <FormLabel component="legend" sx={{ color: textColor }}>
-              Language
-            </FormLabel>
-            <RadioGroup
-              value={currentFile.lang}
-              onChange={(e) => updateLanguage(e.target.value)}
-            >
-              <FormControlLabel value="python3" control={<Radio />} label="Python" />
-              <FormControlLabel value="c" control={<Radio />} label="C" />
-              <FormControlLabel value="cpp" control={<Radio />} label="C++" />
-              <FormControlLabel value="java" control={<Radio />} label="Java" />
-            </RadioGroup>
-          </FormControl>
+          <FormLabel component="legend" sx={{ color: textColor }}>
+            Language
+          </FormLabel>
+          <RadioGroup
+            row
+            value={currentFile.lang}
+            onChange={(e) => updateLanguage(e.target.value)}
+            sx={{ display: "flex", justifyContent: "space-evenly" }}>
+            <FormControlLabel value="python3" control={<Radio />} label="Python" />
+            <FormControlLabel value="c" control={<Radio />} label="C" />
+            <FormControlLabel value="cpp" control={<Radio />} label="C++" />
+            <FormControlLabel value="java" control={<Radio />} label="Java" />
+          </RadioGroup>
+        </FormControl>
 
           <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
             <Button
