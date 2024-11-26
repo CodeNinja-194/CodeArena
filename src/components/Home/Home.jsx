@@ -13,6 +13,22 @@ function Home() {
     return isDarkMode ? "#2c2c2c" : "#f9f9f9";
   };
 
+  // Dynamic Greeting Logic
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 18) return "Good Afternoon";
+    return "Good Evening";
+  };
+
+  // Dynamic Tagline
+  const getTagline = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Start your day with powerful coding tools.";
+    if (hour < 18) return "Boost your afternoon with seamless collaboration.";
+    return "End your day by exploring new coding horizons.";
+  };
+
   return (
     <Box
       sx={{
@@ -44,6 +60,20 @@ function Home() {
             animation: "fadeIn 1.5s ease-in-out",
           }}
         >
+          {/* Dynamic Greeting */}
+          <Typography
+            variant="h6"
+            sx={{
+              color: isDarkMode ? "#dcdcdc" : "#555",
+              fontSize: "1.2rem",
+              fontWeight: 500,
+              fontFamily: "Poppins, sans-serif",
+              marginBottom: "0.5rem",
+            }}
+          >
+            {`${getGreeting()}, Guest!`}
+          </Typography>
+
           <Typography
             variant="h2"
             sx={{
@@ -68,7 +98,7 @@ function Home() {
               marginBottom: "2rem",
             }}
           >
-            A powerful platform for seamless coding, collaboration, and learning.
+            {getTagline()}
           </Typography>
 
           <Box sx={{ display: "flex", gap: "1rem", justifyContent: { xs: "center", md: "flex-start" } }}>
@@ -126,6 +156,11 @@ function Home() {
                 backgroundColor: isDarkMode ? "#3c3c3c" : "#ffffff",
                 boxShadow: "0 4px 16px rgba(0, 0, 0, 0.1)",
                 textAlign: "center",
+                transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                "&:hover": {
+                  transform: "translateY(-10px)",
+                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
+                },
               }}
             >
               <Typography
@@ -162,6 +197,11 @@ function Home() {
                 backgroundColor: isDarkMode ? "#3c3c3c" : "#ffffff",
                 boxShadow: "0 4px 16px rgba(0, 0, 0, 0.1)",
                 textAlign: "center",
+                transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                "&:hover": {
+                  transform: "translateY(-10px)",
+                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
+                },
               }}
             >
               <Typography
