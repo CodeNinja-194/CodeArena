@@ -12,32 +12,61 @@ import {
   Tabs,
   TextField,
   useTheme,
+  Switch,
+  Slider,
+  IconButton,
+  Snackbar,
 } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/CloudDownload";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import AddIcon from "@mui/icons-material/Add";
+import Brightness4Icon from "@mui/icons-material/Brightness4";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import SaveIcon from "@mui/icons-material/Save";
+import ClearIcon from "@mui/icons-material/Clear";
 import AceEditor from "react-ace";
 import { saveAs } from "file-saver";
+import * as firebase from 'firebase/app';
+import 'firebase/database';
 
+// Import necessary Ace modules
 import "ace-builds/src-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/mode-c_cpp";
 import "ace-builds/src-noconflict/mode-java";
 import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/theme-chrome"; // Light theme for Ace Editor
 
+// Initialize Firebase
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID",
+};
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+} else {
+  firebase.app();
+}
+
 function Editor() {
   const [activeTab, setActiveTab] = useState(0);
   const [files, setFiles] = useState([]);
   const [input, setInput] = useState("");
   const [executing, setExecuting] = useState(false);
+  const [theme, setTheme] = useState("light");
+  const [fontSize, setFontSize] = useState(16);
+  const [lineNumbers, setLineNumbers] = useState(true);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState("");
 
-  const theme = useTheme();
-  const isDarkTheme = theme.palette.mode === "dark";
+  const isDarkTheme = theme === "dark";
 
-  const editorBackgroundColor = isDarkTheme ? "#f5f5f5" : "#ffffff";
-  const textColor = "#333";
-  const inputOutputBackground = "#ffffff";
-
+  // Language map and default file setup
   const languageMap = {
     cpp: "c_cpp",
     c: "c_cpp",
@@ -53,6 +82,16 @@ function Editor() {
 
   const currentFile = files[activeTab] || defaultFile;
   const editorLang = languageMap[currentFile.lang] || "python";
+
+  // Auto-save functionality
+  useEffect(() => {
+    const interval = setInterval(() => {
+      localStorage.setItem("files", JSON.stringify(files));
+      localStorage.setItem("input", input);
+    }, 5000); // auto-save every 5 seconds
+
+    return () => clearInterval(interval); // clean up on component unmount
+  }, [files, input]);
 
   // Load files and input from localStorage
   useEffect(() => {
@@ -74,84 +113,7 @@ function Editor() {
     localStorage.setItem("input", input);
   }, [files, input]);
 
-  // Custom completer logic for Python, Java, and C++
-  useEffect(() => {
-    const customCompleter = {
-      getCompletions: (editor, session, pos, prefix, callback) => {
-        const pythonCompletions = [
-          { caption: "print", value: "print()", meta: "Python built-in" },
-          { caption: "def", value: "def function_name():\n    pass", meta: "Function definition" },
-          { caption: "if", value: "if condition:\n    pass", meta: "Condition block" },
-          { caption: "for", value: "for i in range():\n    pass", meta: "Loop structure" },
-        ];
-        const javaCompletions = [
-          { caption: "System.out.println", value: "System.out.println();", meta: "Java print" },
-          { caption: "public class", value: "public class ClassName {\n\n}", meta: "Class template" },
-          { caption: "for loop", value: "for (int i = 0; i < n; i++) {\n\n}", meta: "Loop structure" },
-        ];
-        const cppCompletions = [
-          { caption: "cout", value: "cout << \"\";", meta: "C++ print" },
-          { caption: "#include", value: "#include <iostream>", meta: "Include library" },
-          { caption: "int main", value: "int main() {\n\n    return 0;\n}", meta: "Main function" },
-        ];
-
-        const completions =
-          editorLang === "python"
-            ? pythonCompletions
-            : editorLang === "java"
-            ? javaCompletions
-            : cppCompletions;
-
-        callback(null, completions);
-      },
-    };
-
-    ace.acequire("ace/ext/language_tools").addCompleter(customCompleter);
-  }, [editorLang]);
-
-  // Handle Cmd + Enter or Ctrl + Enter to run code
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if ((event.key === "Enter" && (event.metaKey || event.ctrlKey))) {
-        event.preventDefault(); // Prevent default enter behavior
-        createRequest(); // Run code on Cmd+Enter or Ctrl+Enter
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [files, input, activeTab]);
-
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue);
-    setInput("");
-  };
-
-  const handleAddFile = () => {
-    const newFile = { ...defaultFile };
-    setFiles([...files, newFile]);
-    setActiveTab(files.length);
-    setInput("");
-  };
-
-  const handleDeleteFile = (index) => {
-    if (files.length > 1) {
-      const updatedFiles = files.filter((_, i) => i !== index);
-      setFiles(updatedFiles);
-      setActiveTab(Math.max(0, activeTab - 1));
-      setInput("");
-    }
-  };
-
-  const updateCode = (newCode) => {
-    const updatedFiles = [...files];
-    updatedFiles[activeTab].code = newCode;
-    setFiles(updatedFiles);
-  };
-
+  // Editor language change logic
   const updateLanguage = (newLang) => {
     const updatedFiles = [...files];
     updatedFiles[activeTab].lang = newLang;
@@ -173,6 +135,36 @@ int main() {
     setFiles(updatedFiles);
   };
 
+  // Template insertion logic
+  const templates = {
+    python3: `def main():
+    print("Hello, Codetantra!")`,
+    java: `class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello, Codetantra!");
+    }
+}`,
+    cpp: `#include <iostream>
+using namespace std;
+int main() {
+    cout << "Hello, Codetantra!";
+    return 0;
+}`,
+  };
+
+  const handleTemplateSelection = (template) => {
+    setSelectedTemplate(template);
+    updateCode(templates[template]);
+  };
+
+  // Update code logic
+  const updateCode = (newCode) => {
+    const updatedFiles = [...files];
+    updatedFiles[activeTab].code = newCode;
+    setFiles(updatedFiles);
+  };
+
+  // Run code logic
   const createRequest = async () => {
     try {
       setExecuting(true);
@@ -198,6 +190,7 @@ int main() {
     }
   };
 
+  // Clear code logic
   const handleClear = () => {
     updateCode("");
     setInput("");
@@ -206,6 +199,7 @@ int main() {
     setFiles(updatedFiles);
   };
 
+  // Download code logic
   const handleDownloadCode = () => {
     const languageArrayExtension = {
       java: "java",
@@ -217,23 +211,24 @@ int main() {
     saveAs(blob, `code.${languageArrayExtension[currentFile.lang]}`);
   };
 
+  // Theme toggle functionality
+  const toggleTheme = () => {
+    setTheme(isDarkTheme ? "light" : "dark");
+  };
+
   return (
     <Box
       sx={{
         height: "100vh",
-        backgroundColor: inputOutputBackground,
+        backgroundColor: isDarkTheme ? "#121212" : "#f5f5f5",
         display: "grid",
         gridTemplateRows: "auto 1fr",
         overflow: "hidden",
       }}
     >
-      <Tabs value={activeTab} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
+      <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)} variant="scrollable" scrollButtons="auto">
         {files.map((file, index) => (
-          <Tab
-            key={index}
-            label={`File ${index + 1}`}
-            onDoubleClick={() => handleDeleteFile(index)}
-          />
+          <Tab key={index} label={`File ${index + 1}`} />
         ))}
         <Button onClick={handleAddFile} sx={{ minWidth: "2rem", color: "primary.main" }}>
           +
@@ -243,116 +238,57 @@ int main() {
       <Box sx={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: 2 }}>
         <AceEditor
           mode={editorLang}
-          theme="chrome"
+          theme={isDarkTheme ? "monokai" : "chrome"}
           name={`editor-${activeTab}`}
           onChange={updateCode}
           value={currentFile.code}
-          fontSize={16}
+          fontSize={fontSize}
+          showGutter={lineNumbers}
           enableBasicAutocompletion
           enableLiveAutocompletion
-          style={{
-            height: "calc(100vh - 48px)",
-            width: "100%",
-            backgroundColor: editorBackgroundColor,
+          setOptions={{
+            enableSnippets: true,
+            showLineNumbers: lineNumbers,
+            showPrintMargin: false,
+            fontSize: fontSize,
           }}
         />
-
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-            height: "calc(100vh - 48px)",
-            overflowY: "auto",
-          }}
-        >
-          <FormControl component="fieldset">
-            <FormLabel component="legend" sx={{ color: textColor }}>
-              Language
-            </FormLabel>
+        <Box sx={{ padding: 2 }}>
+          <FormControl component="fieldset" sx={{ mb: 2 }}>
+            <FormLabel component="legend">Language</FormLabel>
             <RadioGroup
               row
               value={currentFile.lang}
-              onChange={(e) => updateLanguage(e.target.value)}
-              sx={{ display: "flex", justifyContent: "space-evenly" }}
+              onChange={(event) => updateLanguage(event.target.value)}
             >
               <FormControlLabel value="python3" control={<Radio />} label="Python" />
-              <FormControlLabel value="c" control={<Radio />} label="C" />
               <FormControlLabel value="cpp" control={<Radio />} label="C++" />
               <FormControlLabel value="java" control={<Radio />} label="Java" />
             </RadioGroup>
           </FormControl>
 
-          <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
-            <Button
-              variant="contained"
-              onClick={createRequest}
-              startIcon={<PlayArrowRoundedIcon />}
-              disabled={executing}
-              size="small"
-              sx={{
-                backgroundColor: "#4caf50",
-                "&:hover": { backgroundColor: "#388e3c" },
-              }}
-            >
-              Run
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <IconButton onClick={toggleTheme}>
+              <Brightness4Icon />
+            </IconButton>
+
+            <Button onClick={createRequest} disabled={executing}>
+              <PlayArrowRoundedIcon /> Run
             </Button>
-            <Button
-              variant="contained"
-              onClick={handleClear}
-              startIcon={<RefreshIcon />}
-              size="small"
-              sx={{
-                backgroundColor: "#ff9800",
-                "&:hover": { backgroundColor: "#f57c00" },
-              }}
-            >
-              Clear
+            <Button onClick={handleClear}>
+              <ClearIcon />
             </Button>
-            <Button
-              variant="contained"
-              onClick={handleDownloadCode}
-              startIcon={<DownloadIcon />}
-              size="small"
-              sx={{
-                backgroundColor: "#2196f3",
-                "&:hover": { backgroundColor: "#1976d2" },
-              }}
-            >
-              Download
+            <Button onClick={handleDownloadCode}>
+              <DownloadIcon />
             </Button>
           </Box>
 
-          {executing && <LinearProgress />}
-
-          <TextField
-            multiline
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            rows={5}
-            variant="outlined"
-            sx={{
-              backgroundColor: inputOutputBackground,
-              color: textColor,
-              borderRadius: 1,
-              border: `1px solid #ccc`,
-            }}
+          <Snackbar
+            open={snackbarOpen}
+            message="Code saved automatically."
+            autoHideDuration={3000}
+            onClose={() => setSnackbarOpen(false)}
           />
-
-          <Box
-            sx={{
-              flex: 1,
-              backgroundColor: "#f9f9f9",
-              padding: 2,
-              overflowY: "auto",
-              borderRadius: 1,
-              border: "1px solid #ccc",
-              whiteSpace: "pre-wrap",
-              color: textColor,
-            }}
-          >
-            {currentFile.output || "Output will appear here..."}
-          </Box>
         </Box>
       </Box>
     </Box>
