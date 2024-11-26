@@ -79,27 +79,20 @@ function Editor() {
     const customCompleter = {
       getCompletions: (editor, session, pos, prefix, callback) => {
         const pythonCompletions = [
-          { caption: "print", value: "print()", meta: "Python built-in function" },
+          { caption: "print", value: "print()", meta: "Python built-in" },
           { caption: "def", value: "def function_name():\n    pass", meta: "Function definition" },
           { caption: "if", value: "if condition:\n    pass", meta: "Condition block" },
           { caption: "for", value: "for i in range():\n    pass", meta: "Loop structure" },
-          { caption: "import", value: "import os", meta: "Import module" },
-          { caption: "os", value: "os.getcwd()", meta: "OS module function" },
-          { caption: "math", value: "import math\nmath.sqrt()", meta: "Math module function" },
         ];
-
         const javaCompletions = [
           { caption: "System.out.println", value: "System.out.println();", meta: "Java print" },
           { caption: "public class", value: "public class ClassName {\n\n}", meta: "Class template" },
-          { caption: "for", value: "for (int i = 0; i < n; i++) {\n\n}", meta: "For loop" },
-          { caption: "ArrayList", value: "ArrayList<Type> list = new ArrayList<>();", meta: "Java ArrayList" },
+          { caption: "for loop", value: "for (int i = 0; i < n; i++) {\n\n}", meta: "Loop structure" },
         ];
-
         const cppCompletions = [
           { caption: "cout", value: "cout << \"\";", meta: "C++ print" },
           { caption: "#include", value: "#include <iostream>", meta: "Include library" },
           { caption: "int main", value: "int main() {\n\n    return 0;\n}", meta: "Main function" },
-          { caption: "vector", value: "std::vector<int> vec;", meta: "C++ vector" },
         ];
 
         const completions =
@@ -251,75 +244,114 @@ int main() {
         <AceEditor
           mode={editorLang}
           theme="chrome"
-          value={currentFile.code}
+          name={`editor-${activeTab}`}
           onChange={updateCode}
-          name="codeEditor"
-          width="100%"
-          height="100%"
-          showPrintMargin={false}
-          fontSize={14}
+          value={currentFile.code}
+          fontSize={16}
           enableBasicAutocompletion
           enableLiveAutocompletion
-          enableSnippets
-          setOptions={{
-            showLineNumbers: true,
-            tabSize: 2,
-            wrap: true,
+          style={{
+            height: "calc(100vh - 48px)",
+            width: "100%",
+            backgroundColor: editorBackgroundColor,
           }}
         />
-        <Box>
-          <FormControl sx={{ marginBottom: 2 }}>
-            <FormLabel>Language</FormLabel>
+
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            height: "calc(100vh - 48px)",
+            overflowY: "auto",
+          }}
+        >
+          <FormControl component="fieldset">
+            <FormLabel component="legend" sx={{ color: textColor }}>
+              Language
+            </FormLabel>
             <RadioGroup
               row
               value={currentFile.lang}
               onChange={(e) => updateLanguage(e.target.value)}
+              sx={{ display: "flex", justifyContent: "space-evenly" }}
             >
               <FormControlLabel value="python3" control={<Radio />} label="Python" />
-              <FormControlLabel value="java" control={<Radio />} label="Java" />
+              <FormControlLabel value="c" control={<Radio />} label="C" />
               <FormControlLabel value="cpp" control={<Radio />} label="C++" />
+              <FormControlLabel value="java" control={<Radio />} label="Java" />
             </RadioGroup>
           </FormControl>
 
-          <TextField
-            multiline
-            label="Input"
-            variant="outlined"
-            rows={4}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            fullWidth
-            sx={{ marginBottom: 2 }}
-          />
-
-          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-            <Button onClick={handleDownloadCode} startIcon={<DownloadIcon />} color="primary">
-              Download Code
+          <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
+            <Button
+              variant="contained"
+              onClick={createRequest}
+              startIcon={<PlayArrowRoundedIcon />}
+              disabled={executing}
+              size="small"
+              sx={{
+                backgroundColor: "#4caf50",
+                "&:hover": { backgroundColor: "#388e3c" },
+              }}
+            >
+              Run
             </Button>
-            <Button onClick={handleClear} startIcon={<RefreshIcon />} color="secondary">
+            <Button
+              variant="contained"
+              onClick={handleClear}
+              startIcon={<RefreshIcon />}
+              size="small"
+              sx={{
+                backgroundColor: "#ff9800",
+                "&:hover": { backgroundColor: "#f57c00" },
+              }}
+            >
               Clear
             </Button>
             <Button
-              onClick={createRequest}
-              startIcon={<PlayArrowRoundedIcon />}
-              color="primary"
-              disabled={executing}
+              variant="contained"
+              onClick={handleDownloadCode}
+              startIcon={<DownloadIcon />}
+              size="small"
+              sx={{
+                backgroundColor: "#2196f3",
+                "&:hover": { backgroundColor: "#1976d2" },
+              }}
             >
-              Run Code
+              Download
             </Button>
           </Box>
 
-          {executing && <LinearProgress sx={{ marginTop: 2 }} />}
+          {executing && <LinearProgress />}
+
+          <TextField
+            multiline
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            rows={5}
+            variant="outlined"
+            sx={{
+              backgroundColor: inputOutputBackground,
+              color: textColor,
+              borderRadius: 1,
+              border: `1px solid #ccc`,
+            }}
+          />
+
           <Box
             sx={{
-              marginTop: 2,
-              padding: 1,
-              backgroundColor: "#f5f5f5",
+              flex: 1,
+              backgroundColor: "#f9f9f9",
+              padding: 2,
               overflowY: "auto",
-              height: "300px",
+              borderRadius: 1,
+              border: "1px solid #ccc",
+              whiteSpace: "pre-wrap",
+              color: textColor,
             }}
           >
-            <pre>{currentFile.output}</pre>
+            {currentFile.output || "Output will appear here..."}
           </Box>
         </Box>
       </Box>
