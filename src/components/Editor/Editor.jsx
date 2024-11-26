@@ -63,22 +63,20 @@ function Editor() {
       setInput(savedInput);
     }
 
-    // Event listener for Cmd+Enter / Ctrl+Enter to run the code
+    // Add keydown event listener for Cmd/Ctrl + Enter
     const handleKeyDown = (event) => {
-      if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
-        event.preventDefault(); // Prevent default behavior of Enter key
-        createRequest(); // Run the code
+      if ((event.key === "Enter" && (event.metaKey || event.ctrlKey))) {
+        createRequest(); // Run code when Cmd+Enter or Ctrl+Enter is pressed
       }
     };
 
-    // Attach event listener when component mounts
     window.addEventListener("keydown", handleKeyDown);
 
-    // Cleanup the event listener when component unmounts
+    // Cleanup event listener on unmount
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [files, input, activeTab]); // Dependencies include files and input to handle updates
+  }, [files, input]);
 
   // Save the state to localStorage whenever files or input changes
   useEffect(() => {
@@ -265,72 +263,72 @@ int main() {
           >
             <Button
               variant="contained"
-              color="primary"
-              sx={{ flexGrow: 1 }}
               onClick={createRequest}
+              startIcon={<PlayArrowRoundedIcon />}
               disabled={executing}
+              size="small"
+              sx={{
+                backgroundColor: "#4caf50", // Green background for 'Run'
+                "&:hover": {
+                  backgroundColor: "#388e3c", // Darker green on hover
+                },
+              }}
             >
-              <PlayArrowRoundedIcon />
               Run
             </Button>
-
             <Button
-              variant="contained"
-              color="secondary"
-              sx={{ flexGrow: 1 }}
+              variant="outlined"
               onClick={handleClear}
+              size="small"
+              sx={{
+                backgroundColor: "#f44336", // Red background for 'Clear'
+                "&:hover": {
+                  backgroundColor: "#d32f2f", // Darker red on hover
+                },
+              }}
             >
-              <RefreshIcon />
               Clear
             </Button>
-          </Box>
-
-          {executing && <LinearProgress sx={{ marginTop: "10px" }} />}
-
-          <TextField
-            label="Input"
-            multiline
-            rows={6}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            fullWidth
-            variant="outlined"
-            sx={{ marginTop: 2 }}
-          />
-
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
             <Button
-              variant="contained"
-              color="default"
-              sx={{ marginTop: 2 }}
+              variant="outlined"
               onClick={handleDownloadCode}
+              startIcon={<DownloadIcon />}
+              size="small"
+              sx={{
+                backgroundColor: "#2196f3", // Blue background for 'Download'
+                "&:hover": {
+                  backgroundColor: "#1976d2", // Darker blue on hover
+                },
+              }}
             >
-              <DownloadIcon />
               Download
             </Button>
           </Box>
 
+          {executing && <LinearProgress />}
+          <TextField
+            label="Input"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            multiline
+            rows={4}
+            variant="outlined"
+            fullWidth
+            sx={{
+              backgroundColor: editorBackgroundColor,
+            }}
+          />
           <TextField
             label="Output"
-            multiline
-            rows={6}
             value={currentFile.output}
-            fullWidth
+            multiline
+            rows={4}
             variant="outlined"
-            sx={{ marginTop: 2 }}
-            InputProps={{
-              readOnly: true,
-              style: {
-                backgroundColor: editorBackgroundColor,
-                color: textColor,
-              },
+            fullWidth
+            sx={{
+              backgroundColor: editorBackgroundColor,
             }}
+            disabled
           />
         </Box>
       </Box>
