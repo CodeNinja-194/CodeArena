@@ -25,7 +25,7 @@ import "ace-builds/src-noconflict/mode-java";
 import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/theme-chrome"; // Light theme for Ace Editor
 
-function Editor() {
+const Editor = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [files, setFiles] = useState([]);
   const [input, setInput] = useState("");
@@ -357,6 +357,6 @@ int main() {
       </Box>
     </Box>
   );
-}
+};
 
 export default Editor;
