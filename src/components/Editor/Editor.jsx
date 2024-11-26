@@ -12,9 +12,6 @@ import {
   Tabs,
   TextField,
   useTheme,
-  Select,
-  MenuItem,
-  InputLabel,
 } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/CloudDownload";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
@@ -33,8 +30,10 @@ function Editor() {
   const [files, setFiles] = useState([]);
   const [input, setInput] = useState("");
   const [executing, setExecuting] = useState(false);
+
   const theme = useTheme();
   const isDarkTheme = theme.palette.mode === "dark";
+
   const editorBackgroundColor = isDarkTheme ? "#f5f5f5" : "#ffffff";
   const textColor = "#333";
   const inputOutputBackground = "#ffffff";
@@ -55,26 +54,6 @@ function Editor() {
   const currentFile = files[activeTab] || defaultFile;
   const editorLang = languageMap[currentFile.lang] || "python";
 
-  // Code Snippets for each language
-  const codeSnippets = {
-    python: [
-      { caption: "print", value: "print()", description: "Python print statement" },
-      { caption: "for loop", value: "for i in range():\n    pass", description: "Python for loop" },
-      { caption: "def function", value: "def function_name():\n    pass", description: "Python function" },
-      { caption: "if statement", value: "if condition:\n    pass", description: "Python if statement" },
-    ],
-    java: [
-      { caption: "System.out.println", value: "System.out.println();", description: "Java print" },
-      { caption: "for loop", value: "for (int i = 0; i < n; i++) {\n    // your code\n}", description: "Java for loop" },
-      { caption: "public class", value: "public class ClassName {\n    public static void main(String[] args) {\n        // your code\n    }\n}", description: "Java class template" },
-    ],
-    cpp: [
-      { caption: "cout", value: "cout << \"\";", description: "C++ print statement" },
-      { caption: "for loop", value: "for (int i = 0; i < n; i++) {\n    // your code\n}", description: "C++ for loop" },
-      { caption: "int main", value: "int main() {\n    // your code\n    return 0;\n}", description: "C++ main function" },
-    ]
-  };
-
   // Load files and input from localStorage
   useEffect(() => {
     const savedFiles = localStorage.getItem("files");
@@ -94,6 +73,50 @@ function Editor() {
     localStorage.setItem("files", JSON.stringify(files));
     localStorage.setItem("input", input);
   }, [files, input]);
+
+  // Custom completer logic for Python, Java, and C++
+  useEffect(() => {
+    const customCompleter = {
+      getCompletions: (editor, session, pos, prefix, callback) => {
+        const pythonCompletions = [
+          { caption: "print", value: "print()", meta: "Python built-in function" },
+          { caption: "def", value: "def function_name():\n    pass", meta: "Function definition" },
+          { caption: "if", value: "if condition:\n    pass", meta: "Condition block" },
+          { caption: "for", value: "for i in range():\n    pass", meta: "Loop structure" },
+          { caption: "import", value: "import os", meta: "Import module" },
+          { caption: "os", value: "os.getcwd()", meta: "OS module function" },
+          { caption: "math", value: "import math\nmath.sqrt()", meta: "Math module function" }
+        ];
+
+        const javaCompletions = [
+          { caption: "System.out.println", value: "System.out.println();", meta: "Java print" },
+          { caption: "public class", value: "public class ClassName {\n\n}", meta: "Class template" },
+          { caption: "for", value: "for (int i = 0; i < n; i++) {\n\n}", meta: "For loop" },
+          { caption: "ArrayList", value: "ArrayList<Type> list = new ArrayList<>();", meta: "Java ArrayList" },
+          { caption: "Scanner", value: "Scanner sc = new Scanner(System.in);", meta: "Java Scanner" }
+        ];
+
+        const cppCompletions = [
+          { caption: "cout", value: "cout << \"\";", meta: "C++ print" },
+          { caption: "#include", value: "#include <iostream>", meta: "Include library" },
+          { caption: "int main", value: "int main() {\n\n    return 0;\n}", meta: "Main function" },
+          { caption: "vector", value: "std::vector<int> vec;", meta: "C++ vector" },
+          { caption: "string", value: "std::string str;", meta: "C++ string" }
+        ];
+
+        const completions =
+          editorLang === "python"
+            ? pythonCompletions
+            : editorLang === "java"
+            ? javaCompletions
+            : cppCompletions;
+
+        callback(null, completions);
+      },
+    };
+
+    ace.acequire("ace/ext/language_tools").addCompleter(customCompleter);
+  }, [editorLang]);
 
   // Handle Cmd + Enter or Ctrl + Enter to run code
   useEffect(() => {
@@ -145,8 +168,17 @@ function Editor() {
       newLang === "python3"
         ? `print("Welcome to Codetantra")`
         : newLang === "java"
-        ? `import java.util.*;\n    class Main {\n    public static void main(String[] args) {\n        System.out.println("Welcome to Codetantra");\n    }\n}`
-        : `#include <iostream>\nusing namespace std;\nint main() {\n    cout << "Welcome to Codetantra";\n    return 0;\n}`;
+        ? `class Main {
+    public static void main(String[] args) {
+        System.out.println("Welcome to Codetantra");
+    }
+}`
+        : `#include <iostream>
+using namespace std;
+int main() {
+    cout << "Welcome to Codetantra";
+    return 0;
+}`;
     setFiles(updatedFiles);
   };
 
@@ -194,13 +226,6 @@ function Editor() {
     saveAs(blob, `code.${languageArrayExtension[currentFile.lang]}`);
   };
 
-  // Insert Snippet into the current code
-  const insertSnippet = (snippet) => {
-    const updatedFiles = [...files];
-    updatedFiles[activeTab].code += snippet.value; // Append the snippet
-    setFiles(updatedFiles);
-  };
-
   return (
     <Box
       sx={{
@@ -219,105 +244,120 @@ function Editor() {
             onDoubleClick={() => handleDeleteFile(index)}
           />
         ))}
-        <Button onClick={handleAddFile} sx={{ minWidth: "2rem", color: "primary.main" }}>
-          +
-        </Button>
+        <Button onClick={handleAddFile} sx={{ marginLeft: "auto" }}>+</Button>
       </Tabs>
-
-      <Box sx={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: 2 }}>
-        <AceEditor
-          mode={editorLang}
-          theme="chrome"
-          name={`editor-${activeTab}`}
-          onChange={updateCode}
-          value={currentFile.code}
-          fontSize={16}
-          enableBasicAutocompletion
-          enableLiveAutocompletion
-          style={{
-            height: "calc(100vh - 48px)",
-            width: "100%",
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "1rem",
+          padding: "1rem",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "1rem",
             backgroundColor: editorBackgroundColor,
-            color: textColor,
+            borderRadius: "8px",
+            padding: "1rem",
+            boxShadow: 3,
           }}
-        />
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          {/* Snippet Dropdown */}
-          <FormControl fullWidth>
-            <InputLabel>Insert Snippet</InputLabel>
-            <Select
-              value=""
-              label="Insert Snippet"
-              onChange={(e) => insertSnippet(e.target.value)}
-            >
-              {codeSnippets[editorLang]?.map((snippet, index) => (
-                <MenuItem key={index} value={snippet}>
-                  {snippet.caption} - {snippet.description}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {/* Language Selection */}
-          <FormControl component="fieldset">
-            <FormLabel component="legend" sx={{ color: textColor }}>
-              Language
-            </FormLabel>
+        >
+          <FormControl>
+            <FormLabel>Language</FormLabel>
             <RadioGroup
-              row
               value={currentFile.lang}
               onChange={(e) => updateLanguage(e.target.value)}
-              sx={{ display: "flex", justifyContent: "space-evenly" }}
+              row
             >
               <FormControlLabel value="python3" control={<Radio />} label="Python" />
-              <FormControlLabel value="c" control={<Radio />} label="C" />
-              <FormControlLabel value="cpp" control={<Radio />} label="C++" />
               <FormControlLabel value="java" control={<Radio />} label="Java" />
+              <FormControlLabel value="cpp" control={<Radio />} label="C++" />
             </RadioGroup>
           </FormControl>
-
-          {/* Buttons */}
-          <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
+          <AceEditor
+            mode={editorLang}
+            theme="chrome"
+            value={currentFile.code}
+            onChange={updateCode}
+            name="editor"
+            editorProps={{ $blockScrolling: true }}
+            width="100%"
+            height="300px"
+            enableBasicAutocompletion={true}
+            enableLiveAutocompletion={true}
+            enableSnippets={true}
+          />
+          <FormControl>
+            <TextField
+              label="Input"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              multiline
+              minRows={3}
+              variant="outlined"
+              fullWidth
+            />
+          </FormControl>
+        </Box>
+        <Box
+          sx={{
+            backgroundColor: editorBackgroundColor,
+            borderRadius: "8px",
+            padding: "1rem",
+            boxShadow: 3,
+          }}
+        >
+          <FormControl>
             <Button
-              sx={{ flex: 1 }}
               variant="contained"
               color="primary"
               onClick={createRequest}
               disabled={executing}
+              fullWidth
+              startIcon={<PlayArrowRoundedIcon />}
             >
-              {executing ? <LinearProgress size={24} /> : <PlayArrowRoundedIcon />}
-              Run
+              Run Code
             </Button>
+            {executing && <LinearProgress />}
+          </FormControl>
+          <FormControl>
             <Button
-              sx={{ flex: 1 }}
               variant="outlined"
+              color="secondary"
               onClick={handleClear}
+              fullWidth
+              startIcon={<RefreshIcon />}
             >
-              <RefreshIcon />
               Clear
             </Button>
+          </FormControl>
+          <FormControl>
             <Button
-              sx={{ flex: 1 }}
               variant="outlined"
+              color="success"
               onClick={handleDownloadCode}
+              fullWidth
+              startIcon={<DownloadIcon />}
             >
-              <DownloadIcon />
-              Download
+              Download Code
             </Button>
+          </FormControl>
+          <Box
+            sx={{
+              padding: "1rem",
+              backgroundColor: "#f1f1f1",
+              borderRadius: "8px",
+              marginTop: "1rem",
+              height: "300px",
+              overflow: "auto",
+            }}
+          >
+            <pre>{currentFile.output}</pre>
           </Box>
         </Box>
-      </Box>
-
-      <Box
-        sx={{
-          padding: 2,
-          backgroundColor: "#333",
-          color: "#fff",
-          maxHeight: "40vh",
-          overflowY: "auto",
-        }}
-      >
-        <pre>{currentFile.output}</pre>
       </Box>
     </Box>
   );
