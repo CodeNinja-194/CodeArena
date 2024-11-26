@@ -1,6 +1,4 @@
-import DownloadIcon from "@mui/icons-material/CloudDownload";
-import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
-import RefreshIcon from "@mui/icons-material/Refresh";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -10,13 +8,14 @@ import {
   LinearProgress,
   Radio,
   RadioGroup,
-  TextField,
   Tab,
   Tabs,
-  InputLabel,
+  TextField,
   useTheme,
 } from "@mui/material";
-import { useState, useEffect } from "react";
+import DownloadIcon from "@mui/icons-material/CloudDownload";
+import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import AceEditor from "react-ace";
 import { saveAs } from "file-saver";
 
@@ -36,8 +35,8 @@ function Editor() {
   const isDarkTheme = theme.palette.mode === "dark";
 
   const editorBackgroundColor = isDarkTheme ? "#f5f5f5" : "#ffffff";
-  const textColor = "#333"; // Uniform text color
-  const inputOutputBackground = "#ffffff"; // White background for non-editor fields
+  const textColor = "#333";
+  const inputOutputBackground = "#ffffff";
 
   const languageMap = {
     cpp: "c_cpp",
@@ -46,51 +45,93 @@ function Editor() {
     python3: "python",
   };
 
-  const currentFile = files[activeTab] || {};
+  const defaultFile = {
+    lang: "python3",
+    code: `print("Welcome to Codetantra")`,
+    output: "",
+  };
+
+  const currentFile = files[activeTab] || defaultFile;
   const editorLang = languageMap[currentFile.lang] || "python";
 
-  // Load the state from localStorage on mount
+  // Load files and input from localStorage
   useEffect(() => {
     const savedFiles = localStorage.getItem("files");
     const savedInput = localStorage.getItem("input");
     if (savedFiles) {
       setFiles(JSON.parse(savedFiles));
     } else {
-      // Default file
-      setFiles([{ lang: "python3", code: `print("Welcome to Codetantra")`, output: "" }]);
+      setFiles([defaultFile]);
     }
     if (savedInput) {
       setInput(savedInput);
     }
+  }, []);
 
-    // Add keydown event listener for Cmd/Ctrl + Enter
-    const handleKeyDown = (event) => {
-      if ((event.key === "Enter" && (event.metaKey || event.ctrlKey))) {
-        createRequest(); // Run code when Cmd+Enter or Ctrl+Enter is pressed
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    // Cleanup event listener on unmount
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [files, input]);
-
-  // Save the state to localStorage whenever files or input changes
+  // Save files and input to localStorage
   useEffect(() => {
     localStorage.setItem("files", JSON.stringify(files));
     localStorage.setItem("input", input);
   }, [files, input]);
 
+  // Custom completer logic for Python, Java, and C++
+  useEffect(() => {
+    const customCompleter = {
+      getCompletions: (editor, session, pos, prefix, callback) => {
+        const pythonCompletions = [
+          { caption: "print", value: "print()", meta: "Python built-in" },
+          { caption: "def", value: "def function_name():\n    pass", meta: "Function definition" },
+          { caption: "if", value: "if condition:\n    pass", meta: "Condition block" },
+          { caption: "for", value: "for i in range():\n    pass", meta: "Loop structure" },
+        ];
+        const javaCompletions = [
+          { caption: "System.out.println", value: "System.out.println();", meta: "Java print" },
+          { caption: "public class", value: "public class ClassName {\n\n}", meta: "Class template" },
+          { caption: "for loop", value: "for (int i = 0; i < n; i++) {\n\n}", meta: "Loop structure" },
+        ];
+        const cppCompletions = [
+          { caption: "cout", value: "cout << \"\";", meta: "C++ print" },
+          { caption: "#include", value: "#include <iostream>", meta: "Include library" },
+          { caption: "int main", value: "int main() {\n\n    return 0;\n}", meta: "Main function" },
+        ];
+
+        const completions =
+          editorLang === "python"
+            ? pythonCompletions
+            : editorLang === "java"
+            ? javaCompletions
+            : cppCompletions;
+
+        callback(null, completions);
+      },
+    };
+
+    ace.acequire("ace/ext/language_tools").addCompleter(customCompleter);
+  }, [editorLang]);
+
+  // Handle Cmd + Enter or Ctrl + Enter to run code
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if ((event.key === "Enter" && (event.metaKey || event.ctrlKey))) {
+        event.preventDefault(); // Prevent default enter behavior
+        createRequest(); // Run code on Cmd+Enter or Ctrl+Enter
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [files, input, activeTab]);
+
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
-    setInput(""); // Reset input field when switching files
+    setInput("");
   };
 
   const handleAddFile = () => {
-    const newFile = { lang: "python3", code: `print("Welcome to Codetantra")`, output: "" };
+    const newFile = { ...defaultFile };
     setFiles([...files, newFile]);
     setActiveTab(files.length);
     setInput("");
@@ -118,41 +159,32 @@ function Editor() {
       newLang === "python3"
         ? `print("Welcome to Codetantra")`
         : newLang === "java"
-        ? `import java.util.*;
-class Main {
+        ? `class Main {
     public static void main(String[] args) {
         System.out.println("Welcome to Codetantra");
     }
 }`
-        : newLang === "cpp"
-        ? `#include <iostream>
+        : `#include <iostream>
 using namespace std;
 int main() {
     cout << "Welcome to Codetantra";
     return 0;
-}`
-        : `#include <stdio.h>
-int main() {
-    printf("Welcome to Codetantra");
-    return 0}`;
+}`;
     setFiles(updatedFiles);
   };
 
   const createRequest = async () => {
     try {
       setExecuting(true);
-      const response = await fetch(
-        "https://code-box.onrender.com/api/v1/submit",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            src: currentFile.code,
-            lang: currentFile.lang,
-            stdin: input,
-          }),
-        }
-      );
+      const response = await fetch("https://code-box.onrender.com/api/v1/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          src: currentFile.code,
+          lang: currentFile.lang,
+          stdin: input,
+        }),
+      });
       const result = await response.json();
       const updatedFiles = [...files];
       updatedFiles[activeTab].output = result.data?.output || result.data?.error || "Error occurred";
@@ -195,12 +227,7 @@ int main() {
         overflow: "hidden",
       }}
     >
-      <Tabs
-        value={activeTab}
-        onChange={handleTabChange}
-        variant="scrollable"
-        scrollButtons="auto"
-      >
+      <Tabs value={activeTab} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
         {files.map((file, index) => (
           <Tab
             key={index}
@@ -221,6 +248,8 @@ int main() {
           onChange={updateCode}
           value={currentFile.code}
           fontSize={16}
+          enableBasicAutocompletion
+          enableLiveAutocompletion
           style={{
             height: "calc(100vh - 48px)",
             width: "100%",
@@ -254,13 +283,7 @@ int main() {
             </RadioGroup>
           </FormControl>
 
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: 1,
-            }}
-          >
+          <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
             <Button
               variant="contained"
               onClick={createRequest}
@@ -268,37 +291,32 @@ int main() {
               disabled={executing}
               size="small"
               sx={{
-                backgroundColor: "#4caf50", // Green background for 'Run'
-                "&:hover": {
-                  backgroundColor: "#388e3c", // Darker green on hover
-                },
+                backgroundColor: "#4caf50",
+                "&:hover": { backgroundColor: "#388e3c" },
               }}
             >
               Run
             </Button>
             <Button
-              variant="outlined"
+              variant="contained"
               onClick={handleClear}
+              startIcon={<RefreshIcon />}
               size="small"
               sx={{
-                backgroundColor: "#f44336", // Red background for 'Clear'
-                "&:hover": {
-                  backgroundColor: "#d32f2f", // Darker red on hover
-                },
+                backgroundColor: "#ff9800",
+                "&:hover": { backgroundColor: "#f57c00" },
               }}
             >
               Clear
             </Button>
             <Button
-              variant="outlined"
+              variant="contained"
               onClick={handleDownloadCode}
               startIcon={<DownloadIcon />}
               size="small"
               sx={{
-                backgroundColor: "#2196f3", // Blue background for 'Download'
-                "&:hover": {
-                  backgroundColor: "#1976d2", // Darker blue on hover
-                },
+                backgroundColor: "#2196f3",
+                "&:hover": { backgroundColor: "#1976d2" },
               }}
             >
               Download
@@ -306,30 +324,35 @@ int main() {
           </Box>
 
           {executing && <LinearProgress />}
+
           <TextField
-            label="Input"
+            multiline
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            multiline
-            rows={4}
+            rows={5}
             variant="outlined"
-            fullWidth
             sx={{
-              backgroundColor: editorBackgroundColor,
+              backgroundColor: inputOutputBackground,
+              color: textColor,
+              borderRadius: 1,
+              border: `1px solid #ccc`,
             }}
           />
-          <TextField
-            label="Output"
-            value={currentFile.output}
-            multiline
-            rows={4}
-            variant="outlined"
-            fullWidth
+
+          <Box
             sx={{
-              backgroundColor: editorBackgroundColor,
+              flex: 1,
+              backgroundColor: "#f9f9f9",
+              padding: 2,
+              overflowY: "auto",
+              borderRadius: 1,
+              border: "1px solid #ccc",
+              whiteSpace: "pre-wrap",
+              color: textColor,
             }}
-            disabled
-          />
+          >
+            {currentFile.output || "Output will appear here..."}
+          </Box>
         </Box>
       </Box>
     </Box>
