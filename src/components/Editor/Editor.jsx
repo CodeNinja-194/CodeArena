@@ -45,7 +45,13 @@ function Editor() {
     python3: "python",
   };
 
-  const currentFile = files[activeTab] || {};
+  const defaultFile = {
+    lang: "python3",
+    code: `print("Welcome to Codetantra")`,
+    output: "",
+  };
+
+  const currentFile = files[activeTab] || defaultFile;
   const editorLang = languageMap[currentFile.lang] || "python";
 
   // Load files and input from localStorage
@@ -55,7 +61,8 @@ function Editor() {
     if (savedFiles) {
       setFiles(JSON.parse(savedFiles));
     } else {
-      setFiles([{ lang: "python3", code: `print("Welcome to Codetantra")`, output: "" }]);
+      // Set a default file with Python as the language if no files are saved
+      setFiles([defaultFile]);
     }
     if (savedInput) {
       setInput(savedInput);
@@ -109,7 +116,7 @@ function Editor() {
   };
 
   const handleAddFile = () => {
-    const newFile = { lang: "python3", code: `print("Welcome to Codetantra")`, output: "" };
+    const newFile = { ...defaultFile };
     setFiles([...files, newFile]);
     setActiveTab(files.length);
     setInput("");
@@ -249,7 +256,6 @@ int main() {
               Language
             </FormLabel>
             <RadioGroup
-              row
               value={currentFile.lang}
               onChange={(e) => updateLanguage(e.target.value)}
             >
