@@ -5,7 +5,6 @@ import {
   FormControl,
   FormControlLabel,
   FormLabel,
-  InputLabel,
   LinearProgress,
   Radio,
   RadioGroup,
@@ -25,7 +24,6 @@ import "ace-builds/src-noconflict/mode-c_cpp";
 import "ace-builds/src-noconflict/mode-java";
 import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/theme-chrome"; // Light theme for Ace Editor
-import "ace-builds/src-noconflict/snippets/python";
 
 function Editor() {
   const [activeTab, setActiveTab] = useState(0);
@@ -50,22 +48,6 @@ function Editor() {
   const currentFile = files[activeTab] || {};
   const editorLang = languageMap[currentFile.lang] || "python";
 
-  // Custom auto-completion logic
-  useEffect(() => {
-    const customCompleter = {
-      getCompletions: (editor, session, pos, prefix, callback) => {
-        const completions = [
-          { caption: "print", value: "print()", meta: "Python built-in" },
-          { caption: "for", value: "for i in range():\n    ", meta: "Loop structure" },
-          { caption: "def", value: "def function_name():\n    ", meta: "Function definition" },
-          { caption: "if", value: "if condition:\n    ", meta: "Condition block" },
-        ];
-        callback(null, completions);
-      },
-    };
-    ace.acequire("ace/ext/language_tools").addCompleter(customCompleter);
-  }, []);
-
   // Load files and input from localStorage
   useEffect(() => {
     const savedFiles = localStorage.getItem("files");
@@ -85,6 +67,41 @@ function Editor() {
     localStorage.setItem("files", JSON.stringify(files));
     localStorage.setItem("input", input);
   }, [files, input]);
+
+  // Custom completer logic for Python, Java, and C++
+  useEffect(() => {
+    const customCompleter = {
+      getCompletions: (editor, session, pos, prefix, callback) => {
+        const pythonCompletions = [
+          { caption: "print", value: "print()", meta: "Python built-in" },
+          { caption: "def", value: "def function_name():\n    pass", meta: "Function definition" },
+          { caption: "if", value: "if condition:\n    pass", meta: "Condition block" },
+          { caption: "for", value: "for i in range():\n    pass", meta: "Loop structure" },
+        ];
+        const javaCompletions = [
+          { caption: "System.out.println", value: "System.out.println();", meta: "Java print" },
+          { caption: "public class", value: "public class ClassName {\n\n}", meta: "Class template" },
+          { caption: "for loop", value: "for (int i = 0; i < n; i++) {\n\n}", meta: "Loop structure" },
+        ];
+        const cppCompletions = [
+          { caption: "cout", value: "cout << \"\";", meta: "C++ print" },
+          { caption: "#include", value: "#include <iostream>", meta: "Include library" },
+          { caption: "int main", value: "int main() {\n\n    return 0;\n}", meta: "Main function" },
+        ];
+
+        const completions =
+          editorLang === "python"
+            ? pythonCompletions
+            : editorLang === "java"
+            ? javaCompletions
+            : cppCompletions;
+
+        callback(null, completions);
+      },
+    };
+
+    ace.acequire("ace/ext/language_tools").addCompleter(customCompleter);
+  }, [editorLang]);
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -125,17 +142,12 @@ function Editor() {
         System.out.println("Welcome to Codetantra");
     }
 }`
-        : newLang === "cpp"
-        ? `#include <iostream>
+        : `#include <iostream>
 using namespace std;
 int main() {
     cout << "Welcome to Codetantra";
     return 0;
-}`
-        : `#include <stdio.h>
-int main() {
-    printf("Welcome to Codetantra");
-    return 0;}`;
+}`;
     setFiles(updatedFiles);
   };
 
@@ -248,34 +260,61 @@ int main() {
             </RadioGroup>
           </FormControl>
 
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: 1,
-            }}
-          >
+          <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
             <Button
               variant="contained"
               onClick={createRequest}
               startIcon={<PlayArrowRoundedIcon />}
               disabled={executing}
+              size="small"
+              sx={{
+                backgroundColor: "#4caf50",
+                "&:hover": { backgroundColor: "#388e3c" },
+              }}
             >
               Run
             </Button>
-            <Button variant="contained" onClick={handleClear} startIcon={<RefreshIcon />}>
+            <Button
+              variant="contained"
+              onClick={handleClear}
+              startIcon={<RefreshIcon />}
+              size="small"
+              sx={{
+                backgroundColor: "#ff9800",
+                "&:hover": { backgroundColor: "#f57c00" },
+              }}
+            >
               Clear
             </Button>
             <Button
               variant="contained"
               onClick={handleDownloadCode}
               startIcon={<DownloadIcon />}
+              size="small"
+              sx={{
+                backgroundColor: "#2196f3",
+                "&:hover": { backgroundColor: "#1976d2" },
+              }}
             >
               Download
             </Button>
           </Box>
 
           {executing && <LinearProgress />}
+
+          <TextField
+            multiline
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            rows={5}
+            variant="outlined"
+            sx={{
+              backgroundColor: inputOutputBackground,
+              color: textColor,
+              borderRadius: 1,
+              border: `1px solid #ccc`,
+            }}
+          />
 
           <Box
             sx={{
