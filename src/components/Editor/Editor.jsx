@@ -13,64 +13,41 @@ import {
   TextField,
   useTheme,
   Switch,
-  Slider,
-  IconButton,
-  Snackbar,
 } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/CloudDownload";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import AddIcon from "@mui/icons-material/Add";
-import Brightness4Icon from "@mui/icons-material/Brightness4";
-import SaveIcon from "@mui/icons-material/Save";
-import ClearIcon from "@mui/icons-material/Clear";
 import AceEditor from "react-ace";
 import { saveAs } from "file-saver";
-import * as firebase from 'firebase/app';
-import 'firebase/database';
+import { useSnackbar } from "notistack";
 
-// Import necessary Ace modules
+// Ace Mode Imports
 import "ace-builds/src-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/mode-c_cpp";
 import "ace-builds/src-noconflict/mode-java";
 import "ace-builds/src-noconflict/mode-python";
-import "ace-builds/src-noconflict/theme-chrome"; // Light theme for Ace Editor
-
-// Initialize Firebase
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
-};
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-} else {
-  firebase.app();
-}
+import "ace-builds/src-noconflict/mode-javascript";
+import "ace-builds/src-noconflict/theme-chrome"; // Light theme
 
 function Editor() {
+  const { enqueueSnackbar } = useSnackbar(); // For snackbar notifications
+
   const [activeTab, setActiveTab] = useState(0);
   const [files, setFiles] = useState([]);
   const [input, setInput] = useState("");
   const [executing, setExecuting] = useState(false);
-  const [theme, setTheme] = useState("light");
-  const [fontSize, setFontSize] = useState(16);
-  const [lineNumbers, setLineNumbers] = useState(true);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState("");
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [fontSize, setFontSize] = useState(16); // Default font size
 
-  const isDarkTheme = theme === "dark";
+  const theme = useTheme();
+  const isDarkTheme = theme.palette.mode === "dark";
 
-  // Language map and default file setup
   const languageMap = {
     cpp: "c_cpp",
     c: "c_cpp",
     java: "java",
     python3: "python",
+    javascript: "javascript", // Added JavaScript
   };
 
   const defaultFile = {
@@ -82,20 +59,12 @@ function Editor() {
   const currentFile = files[activeTab] || defaultFile;
   const editorLang = languageMap[currentFile.lang] || "python";
 
-  // Auto-save functionality
-  useEffect(() => {
-    const interval = setInterval(() => {
-      localStorage.setItem("files", JSON.stringify(files));
-      localStorage.setItem("input", input);
-    }, 5000); // auto-save every 5 seconds
-
-    return () => clearInterval(interval); // clean up on component unmount
-  }, [files, input]);
-
-  // Load files and input from localStorage
   useEffect(() => {
     const savedFiles = localStorage.getItem("files");
     const savedInput = localStorage.getItem("input");
+    const savedTheme = localStorage.getItem("isDarkMode");
+    const savedFontSize = localStorage.getItem("fontSize");
+
     if (savedFiles) {
       setFiles(JSON.parse(savedFiles));
     } else {
@@ -104,15 +73,58 @@ function Editor() {
     if (savedInput) {
       setInput(savedInput);
     }
+    if (savedTheme) {
+      setIsDarkMode(JSON.parse(savedTheme));
+    }
+    if (savedFontSize) {
+      setFontSize(Number(savedFontSize));
+    }
   }, []);
 
-  // Save files and input to localStorage
   useEffect(() => {
     localStorage.setItem("files", JSON.stringify(files));
     localStorage.setItem("input", input);
+    localStorage.setItem("isDarkMode", JSON.stringify(isDarkMode));
+    localStorage.setItem("fontSize", fontSize);
+  }, [files, input, isDarkMode, fontSize]);
+
+  // Auto Save functionality
+  useEffect(() => {
+    const autoSave = setInterval(() => {
+      localStorage.setItem("files", JSON.stringify(files));
+      localStorage.setItem("input", input);
+    }, 10000); // Auto save every 10 seconds
+
+    return () => clearInterval(autoSave); // Clear interval on unmount
   }, [files, input]);
 
-  // Editor language change logic
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+    setInput("");
+  };
+
+  const handleAddFile = () => {
+    const newFile = { ...defaultFile };
+    setFiles([...files, newFile]);
+    setActiveTab(files.length);
+    setInput("");
+  };
+
+  const handleDeleteFile = (index) => {
+    if (files.length > 1) {
+      const updatedFiles = files.filter((_, i) => i !== index);
+      setFiles(updatedFiles);
+      setActiveTab(Math.max(0, activeTab - 1));
+      setInput("");
+    }
+  };
+
+  const updateCode = (newCode) => {
+    const updatedFiles = [...files];
+    updatedFiles[activeTab].code = newCode;
+    setFiles(updatedFiles);
+  };
+
   const updateLanguage = (newLang) => {
     const updatedFiles = [...files];
     updatedFiles[activeTab].lang = newLang;
@@ -125,6 +137,8 @@ function Editor() {
         System.out.println("Welcome to Codetantra");
     }
 }`
+        : newLang === "javascript"
+        ? `console.log("Welcome to Codetantra");`
         : `#include <iostream>
 using namespace std;
 int main() {
@@ -134,36 +148,6 @@ int main() {
     setFiles(updatedFiles);
   };
 
-  // Template insertion logic
-  const templates = {
-    python3: `def main():
-    print("Hello, Codetantra!")`,
-    java: `class Main {
-    public static void main(String[] args) {
-        System.out.println("Hello, Codetantra!");
-    }
-}`,
-    cpp: `#include <iostream>
-using namespace std;
-int main() {
-    cout << "Hello, Codetantra!";
-    return 0;
-}`,
-  };
-
-  const handleTemplateSelection = (template) => {
-    setSelectedTemplate(template);
-    updateCode(templates[template]);
-  };
-
-  // Update code logic
-  const updateCode = (newCode) => {
-    const updatedFiles = [...files];
-    updatedFiles[activeTab].code = newCode;
-    setFiles(updatedFiles);
-  };
-
-  // Run code logic
   const createRequest = async () => {
     try {
       setExecuting(true);
@@ -189,7 +173,6 @@ int main() {
     }
   };
 
-  // Clear code logic
   const handleClear = () => {
     updateCode("");
     setInput("");
@@ -198,97 +181,102 @@ int main() {
     setFiles(updatedFiles);
   };
 
-  // Download code logic
   const handleDownloadCode = () => {
     const languageArrayExtension = {
       java: "java",
       python3: "py",
       cpp: "cpp",
       c: "c",
+      javascript: "js", // Added JavaScript
     };
     const blob = new Blob([currentFile.code], { type: "text/plain;charset=utf-8" });
     saveAs(blob, `code.${languageArrayExtension[currentFile.lang]}`);
   };
 
-  // Theme toggle functionality
   const toggleTheme = () => {
-    setTheme(isDarkTheme ? "light" : "dark");
+    setIsDarkMode(!isDarkMode);
+  };
+
+  const changeFontSize = (size) => {
+    setFontSize(size);
   };
 
   return (
     <Box
       sx={{
         height: "100vh",
-        backgroundColor: isDarkTheme ? "#121212" : "#f5f5f5",
+        backgroundColor: isDarkMode ? "#121212" : "#f5f5f5",
         display: "grid",
         gridTemplateRows: "auto 1fr",
         overflow: "hidden",
       }}
     >
-      <Tabs value={activeTab} onChange={(event, newValue) => setActiveTab(newValue)} variant="scrollable" scrollButtons="auto">
+      <Tabs value={activeTab} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
         {files.map((file, index) => (
-          <Tab key={index} label={`File ${index + 1}`} />
+          <Tab
+            key={index}
+            label={`File ${index + 1}`}
+            onDoubleClick={() => handleDeleteFile(index)}
+          />
         ))}
         <Button onClick={handleAddFile} sx={{ minWidth: "2rem", color: "primary.main" }}>
           +
         </Button>
       </Tabs>
 
-      <Box sx={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: 2 }}>
-        <AceEditor
-          mode={editorLang}
-          theme={isDarkTheme ? "monokai" : "chrome"}
-          name={`editor-${activeTab}`}
-          onChange={updateCode}
-          value={currentFile.code}
-          fontSize={fontSize}
-          showGutter={lineNumbers}
-          enableBasicAutocompletion
-          enableLiveAutocompletion
-          setOptions={{
-            enableSnippets: true,
-            showLineNumbers: lineNumbers,
-            showPrintMargin: false,
-            fontSize: fontSize,
-          }}
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", p: 2 }}>
+        <Button variant="contained" onClick={createRequest} disabled={executing} startIcon={<PlayArrowRoundedIcon />}>
+          Run Code
+        </Button>
+        <Button onClick={handleClear} variant="outlined" startIcon={<RefreshIcon />}>
+          Clear
+        </Button>
+        <Button onClick={handleDownloadCode} variant="outlined" startIcon={<DownloadIcon />}>
+          Download Code
+        </Button>
+
+        <FormControlLabel
+          control={<Switch checked={isDarkMode} onChange={toggleTheme} />}
+          label="Dark Mode"
         />
-        <Box sx={{ padding: 2 }}>
-          <FormControl component="fieldset" sx={{ mb: 2 }}>
-            <FormLabel component="legend">Language</FormLabel>
-            <RadioGroup
-              row
-              value={currentFile.lang}
-              onChange={(event) => updateLanguage(event.target.value)}
-            >
-              <FormControlLabel value="python3" control={<Radio />} label="Python" />
-              <FormControlLabel value="cpp" control={<Radio />} label="C++" />
-              <FormControlLabel value="java" control={<Radio />} label="Java" />
-            </RadioGroup>
-          </FormControl>
 
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <IconButton onClick={toggleTheme}>
-              <Brightness4Icon />
-            </IconButton>
+        <FormControl sx={{ ml: 2 }}>
+          <FormLabel>Font Size</FormLabel>
+          <RadioGroup value={fontSize} onChange={(e) => changeFontSize(e.target.value)}>
+            <FormControlLabel value={12} control={<Radio />} label="12px" />
+            <FormControlLabel value={16} control={<Radio />} label="16px" />
+            <FormControlLabel value={20} control={<Radio />} label="20px" />
+          </RadioGroup>
+        </FormControl>
+      </Box>
 
-            <Button onClick={createRequest} disabled={executing}>
-              <PlayArrowRoundedIcon /> Run
-            </Button>
-            <Button onClick={handleClear}>
-              <ClearIcon />
-            </Button>
-            <Button onClick={handleDownloadCode}>
-              <DownloadIcon />
-            </Button>
-          </Box>
+      <AceEditor
+        mode={editorLang}
+        theme={isDarkMode ? "monokai" : "chrome"}
+        onChange={updateCode}
+        value={currentFile.code}
+        name="code-editor"
+        editorProps={{ $blockScrolling: true }}
+        setOptions={{
+          fontSize: fontSize,
+          showLineNumbers: true,
+        }}
+      />
 
-          <Snackbar
-            open={snackbarOpen}
-            message="Code saved automatically."
-            autoHideDuration={3000}
-            onClose={() => setSnackbarOpen(false)}
+      <Box sx={{ overflowY: "auto", p: 2, maxHeight: "calc(100vh - 230px)", backgroundColor: "#f5f5f5" }}>
+        {executing ? (
+          <LinearProgress />
+        ) : (
+          <TextField
+            value={currentFile.output}
+            fullWidth
+            variant="outlined"
+            multiline
+            rows={12}
+            readOnly
+            sx={{ bgcolor: "#f5f5f5" }}
           />
-        </Box>
+        )}
       </Box>
     </Box>
   );
