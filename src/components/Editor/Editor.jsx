@@ -153,25 +153,26 @@ const Editor = () => {
   };
 
   const updateLanguage = (newLang) => {
-    const updatedFiles = [...files];
-    updatedFiles[activeTab].lang = newLang;
-    updatedFiles[activeTab].code =
-      newLang === "python3"
-        ? `print("Welcome to Codetantra")`
-        : newLang === "java"
-        ? `class Main {
+  const updatedFiles = [...files];
+  updatedFiles[activeTab].lang = newLang;
+  updatedFiles[activeTab].code =
+    newLang === "python3"
+      ? `print("Welcome to Codetantra")`
+      : newLang === "java"
+      ? `import java.util.*;
+class Main {
     public static void main(String[] args) {
         System.out.println("Welcome to Codetantra");
     }
 }`
-        : `#include <iostream>
+      : `#include <iostream>
 using namespace std;
 int main() {
     cout << "Welcome to Codetantra";
     return 0;
 }`;
-    setFiles(updatedFiles);
-  };
+  setFiles(updatedFiles);
+};
 
   const createRequest = async () => {
     try {
