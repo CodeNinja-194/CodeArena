@@ -85,7 +85,7 @@ function Editor() {
           { caption: "for", value: "for i in range():\n    pass", meta: "Loop structure" },
           { caption: "import", value: "import os", meta: "Import module" },
           { caption: "os", value: "os.getcwd()", meta: "OS module function" },
-          { caption: "math", value: "import math\nmath.sqrt()", meta: "Math module function" }
+          { caption: "math", value: "import math\nmath.sqrt()", meta: "Math module function" },
         ];
 
         const javaCompletions = [
@@ -93,7 +93,6 @@ function Editor() {
           { caption: "public class", value: "public class ClassName {\n\n}", meta: "Class template" },
           { caption: "for", value: "for (int i = 0; i < n; i++) {\n\n}", meta: "For loop" },
           { caption: "ArrayList", value: "ArrayList<Type> list = new ArrayList<>();", meta: "Java ArrayList" },
-          { caption: "Scanner", value: "Scanner sc = new Scanner(System.in);", meta: "Java Scanner" }
         ];
 
         const cppCompletions = [
@@ -101,7 +100,6 @@ function Editor() {
           { caption: "#include", value: "#include <iostream>", meta: "Include library" },
           { caption: "int main", value: "int main() {\n\n    return 0;\n}", meta: "Main function" },
           { caption: "vector", value: "std::vector<int> vec;", meta: "C++ vector" },
-          { caption: "string", value: "std::string str;", meta: "C++ string" }
         ];
 
         const completions =
@@ -244,115 +242,81 @@ int main() {
             onDoubleClick={() => handleDeleteFile(index)}
           />
         ))}
-        <Button onClick={handleAddFile} sx={{ marginLeft: "auto" }}>+</Button>
+        <Button onClick={handleAddFile} sx={{ minWidth: "2rem", color: "primary.main" }}>
+          +
+        </Button>
       </Tabs>
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "1rem",
-          padding: "1rem",
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "1rem",
-            backgroundColor: editorBackgroundColor,
-            borderRadius: "8px",
-            padding: "1rem",
-            boxShadow: 3,
+
+      <Box sx={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: 2 }}>
+        <AceEditor
+          mode={editorLang}
+          theme="chrome"
+          value={currentFile.code}
+          onChange={updateCode}
+          name="codeEditor"
+          width="100%"
+          height="100%"
+          showPrintMargin={false}
+          fontSize={14}
+          enableBasicAutocompletion
+          enableLiveAutocompletion
+          enableSnippets
+          setOptions={{
+            showLineNumbers: true,
+            tabSize: 2,
+            wrap: true,
           }}
-        >
-          <FormControl>
+        />
+        <Box>
+          <FormControl sx={{ marginBottom: 2 }}>
             <FormLabel>Language</FormLabel>
             <RadioGroup
+              row
               value={currentFile.lang}
               onChange={(e) => updateLanguage(e.target.value)}
-              row
             >
               <FormControlLabel value="python3" control={<Radio />} label="Python" />
               <FormControlLabel value="java" control={<Radio />} label="Java" />
               <FormControlLabel value="cpp" control={<Radio />} label="C++" />
             </RadioGroup>
           </FormControl>
-          <AceEditor
-            mode={editorLang}
-            theme="chrome"
-            value={currentFile.code}
-            onChange={updateCode}
-            name="editor"
-            editorProps={{ $blockScrolling: true }}
-            width="100%"
-            height="300px"
-            enableBasicAutocompletion={true}
-            enableLiveAutocompletion={true}
-            enableSnippets={true}
+
+          <TextField
+            multiline
+            label="Input"
+            variant="outlined"
+            rows={4}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            fullWidth
+            sx={{ marginBottom: 2 }}
           />
-          <FormControl>
-            <TextField
-              label="Input"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              multiline
-              minRows={3}
-              variant="outlined"
-              fullWidth
-            />
-          </FormControl>
-        </Box>
-        <Box
-          sx={{
-            backgroundColor: editorBackgroundColor,
-            borderRadius: "8px",
-            padding: "1rem",
-            boxShadow: 3,
-          }}
-        >
-          <FormControl>
+
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+            <Button onClick={handleDownloadCode} startIcon={<DownloadIcon />} color="primary">
+              Download Code
+            </Button>
+            <Button onClick={handleClear} startIcon={<RefreshIcon />} color="secondary">
+              Clear
+            </Button>
             <Button
-              variant="contained"
-              color="primary"
               onClick={createRequest}
-              disabled={executing}
-              fullWidth
               startIcon={<PlayArrowRoundedIcon />}
+              color="primary"
+              disabled={executing}
             >
               Run Code
             </Button>
-            {executing && <LinearProgress />}
-          </FormControl>
-          <FormControl>
-            <Button
-              variant="outlined"
-              color="secondary"
-              onClick={handleClear}
-              fullWidth
-              startIcon={<RefreshIcon />}
-            >
-              Clear
-            </Button>
-          </FormControl>
-          <FormControl>
-            <Button
-              variant="outlined"
-              color="success"
-              onClick={handleDownloadCode}
-              fullWidth
-              startIcon={<DownloadIcon />}
-            >
-              Download Code
-            </Button>
-          </FormControl>
+          </Box>
+
+          {executing && <LinearProgress sx={{ marginTop: 2 }} />}
           <Box
             sx={{
-              padding: "1rem",
-              backgroundColor: "#f1f1f1",
-              borderRadius: "8px",
-              marginTop: "1rem",
+              marginTop: 2,
+              padding: 1,
+              backgroundColor: "#f5f5f5",
+              overflowY: "auto",
               height: "300px",
-              overflow: "auto",
             }}
           >
             <pre>{currentFile.output}</pre>
