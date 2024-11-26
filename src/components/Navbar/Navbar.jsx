@@ -1,15 +1,13 @@
 import Brightness4Icon from "@mui/icons-material/Brightness4"; // Dark mode icon
 import Brightness7Icon from "@mui/icons-material/Brightness7"; // Light mode icon
-import MenuIcon from "@mui/icons-material/Menu"; // For mobile menu
-import { AppBar, Box, Breadcrumbs, Button, Container, IconButton, Link, Typography } from "@mui/material";
+import { AppBar, Box, Button, Container, IconButton, Typography } from "@mui/material";
 import React, { useContext, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { CustomContext } from "../../utils/customContext";
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
   const { isDarkMode, setIsDarkMode, isAuthenticated, user } = useContext(CustomContext);
 
   // Dynamic Greeting
@@ -25,13 +23,6 @@ function Navbar() {
 
   // Toggle Dark Mode
   const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
-
-  // Breadcrumbs Logic
-  const breadcrumbs = location.pathname.split("/").filter((crumb) => crumb);
-  const breadcrumbLinks = breadcrumbs.map((crumb, index) => ({
-    label: crumb.charAt(0).toUpperCase() + crumb.slice(1),
-    path: `/${breadcrumbs.slice(0, index + 1).join("/")}`,
-  }));
 
   return (
     <AppBar
@@ -81,35 +72,6 @@ function Navbar() {
         >
           {`${getGreeting()}, ${isAuthenticated ? user?.name || "User" : "Guest"}!`}
         </Typography>
-
-        {/* Breadcrumbs */}
-        <Breadcrumbs
-          separator="›"
-          sx={{
-            display: { xs: "none", md: "flex" },
-            color: isDarkMode ? "#f9f9f9" : "#333",
-          }}
-        >
-          <Link
-            underline="hover"
-            color="inherit"
-            onClick={() => navigate("/")}
-            sx={{ cursor: "pointer" }}
-          >
-            Home
-          </Link>
-          {breadcrumbLinks.map((crumb, index) => (
-            <Link
-              key={index}
-              underline="hover"
-              color="inherit"
-              onClick={() => navigate(crumb.path)}
-              sx={{ cursor: "pointer" }}
-            >
-              {crumb.label}
-            </Link>
-          ))}
-        </Breadcrumbs>
 
         {/* Links */}
         <Box sx={{ display: "flex", gap: "1rem" }}>
