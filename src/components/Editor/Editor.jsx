@@ -38,7 +38,7 @@ function Editor() {
   const [autoSave, setAutoSave] = useState(true);
 
   const theme = useTheme();
-  const isDarkTheme = theme.palette.mode === "dark";
+  const isDarkTheme = theme?.palette?.mode === "dark"; // Safe check for theme object
 
   const editorBackgroundColor = isDarkTheme ? "#f5f5f5" : "#ffffff";
   const textColor = "#333";
@@ -209,25 +209,28 @@ function Editor() {
       javascript: "js",
       ruby: "rb",
     };
-    const blob = new Blob([currentFile.code], { type: "text/plain;charset=utf-8" });
-    saveAs(blob, `code.${languageArrayExtension[currentFile.lang]}`);
+
+    const fileExtension = languageArrayExtension[currentFile.lang] || "txt";
+    const blob = new Blob([currentFile.code], { type: "text/plain" });
+    saveAs(blob, `code.${fileExtension}`);
   };
 
   return (
-    <Box
-      sx={{
-        height: "100vh",
-        backgroundColor: inputOutputBackground,
-        display: "grid",
-        gridTemplateRows: "auto 1fr",
-        overflow: "hidden",
-      }}
-    >
-      <Tabs value={activeTab} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
+    <Box sx={{ display: "flex", flexDirection: "column", gap: "16px", padding: "8px", overflow: "auto" }}>
+      <Tabs value={activeTab} onChange={handleTabChange} aria-label="code editor tabs" variant="scrollable" scrollButtons="auto">
         {files.map((file, index) => (
-          <Tab key={index} label={`File ${index + 1}`} onDoubleClick={() => handleDeleteFile(index)} />
+          <Tab
+            label={
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                {file.lang} {index === activeTab && <span>{file.lang}</span>}
+              </Box>
+            }
+            key={index}
+            onDelete={() => handleDeleteFile(index)}
+            sx={{ minWidth: 120 }}
+          />
         ))}
-        <Button onClick={handleAddFile} sx={{ minWidth: "auto" }}>
+        <Button variant="contained" color="primary" onClick={handleAddFile} sx={{ minWidth: 120 }}>
           +
         </Button>
       </Tabs>
@@ -236,11 +239,7 @@ function Editor() {
         <Box>
           <FormControl component="fieldset" variant="standard">
             <FormLabel component="legend">Language</FormLabel>
-            <RadioGroup
-              row
-              value={currentFile.lang}
-              onChange={(e) => updateLanguage(e.target.value)}
-            >
+            <RadioGroup row value={currentFile.lang} onChange={(e) => updateLanguage(e.target.value)}>
               <FormControlLabel value="python3" control={<Radio />} label="Python" />
               <FormControlLabel value="java" control={<Radio />} label="Java" />
               <FormControlLabel value="cpp" control={<Radio />} label="C++" />
