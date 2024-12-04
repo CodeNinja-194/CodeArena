@@ -38,10 +38,10 @@ const Editor = () => {
   const textColor = "#333";
   const inputOutputBackground = "#ffffff";
 
-  const languageMap = {
+    const languageMap = {
     cpp: "c_cpp",
-    c: "c_cpp",
     java: "java",
+    javascript: "javascript",
     python3: "python",
   };
 
@@ -152,7 +152,7 @@ const Editor = () => {
     setFiles(updatedFiles);
   };
 
-  const updateLanguage = (newLang) => {
+ const updateLanguage = (newLang) => {
   const updatedFiles = [...files];
   updatedFiles[activeTab].lang = newLang;
   updatedFiles[activeTab].code =
@@ -165,6 +165,8 @@ class Main {
         System.out.println("Welcome to Codetantra");
     }
 }`
+      : newLang === "javascript"
+      ? `console.log("Welcome to Codetantra");`
       : `#include <iostream>
 using namespace std;
 int main() {
@@ -272,16 +274,16 @@ int main() {
               Language
             </FormLabel>
             <RadioGroup
-              row
-              value={currentFile.lang}
-              onChange={(e) => updateLanguage(e.target.value)}
-              sx={{ display: "flex", justifyContent: "space-evenly" }}
-            >
-              <FormControlLabel value="python3" control={<Radio />} label="Python" />
-              <FormControlLabel value="c" control={<Radio />} label="C" />
-              <FormControlLabel value="cpp" control={<Radio />} label="C++" />
-              <FormControlLabel value="java" control={<Radio />} label="Java" />
-            </RadioGroup>
+            row
+            value={currentFile.lang}
+            onChange={(e) => updateLanguage(e.target.value)}
+            sx={{ display: "flex", justifyContent: "space-evenly" }}
+          >
+            <FormControlLabel value="python3" control={<Radio />} label="Python" />
+            <FormControlLabel value="cpp" control={<Radio />} label="C++" />
+            <FormControlLabel value="java" control={<Radio />} label="Java" />
+            <FormControlLabel value="javascript" control={<Radio />} label="JavaScript" />
+          </RadioGroup>
           </FormControl>
 
           <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
