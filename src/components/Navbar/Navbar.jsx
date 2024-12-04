@@ -1,9 +1,158 @@
-import Brightness4Icon from "@mui/icons-material/Brightness4"; // Dark mode icon
-import Brightness7Icon from "@mui/icons-material/Brightness7"; // Light mode icon
-import { AppBar, Box, Button, Container, IconButton, Typography } from "@mui/material";
+import { AppBar, Box, Button, Container, Typography } from "@mui/material";
+import { createTheme } from "@mui/material/styles";
 import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CustomContext } from "../../utils/customContext";
+
+// Theme imports
+export const orangeTheme = createTheme({
+  palette: {
+    mode: "dark",
+    primary: {
+      main: "#FF7722",
+    },
+    background: {
+      default: "#1f1e1d",
+      secondary: "#FFFFFF",
+    },
+    text: {
+      primary: "#181715",
+    },
+    light: {
+      main: "#FFFFFF",
+    },
+  },
+
+  MuiTextField: {
+    styleOverrides: {
+      root: {
+        borderRadius: "10px",
+        label: {
+          color: "#FFFFFF",
+        },
+      },
+    },
+  },
+});
+
+export const blueTheme = createTheme({
+  palette: {
+    mode: "dark",
+    primary: {
+      main: "#2196F3",
+    },
+    background: {
+      default: "#19202b",
+    },
+    text: {
+      primary: "#001e3c",
+      secondary: "#FFFFFF",
+    },
+    light: {
+      main: "#FFFFFF",
+    },
+  },
+
+  MuiTextField: {
+    styleOverrides: {
+      root: {
+        borderRadius: "10px",
+        label: {
+          color: "#FFFFFF",
+        },
+      },
+    },
+  },
+});
+
+export const greenTheme = createTheme({
+  palette: {
+    mode: "dark",
+    primary: {
+      main: "rgb(144, 214, 208)",
+    },
+    background: {
+      default: "#101426",
+    },
+    text: {
+      primary: "#222B45",
+      secondary: "#000",
+    },
+    light: {
+      main: "#FFFFFF",
+    },
+  },
+
+  MuiTextField: {
+    styleOverrides: {
+      root: {
+        borderRadius: "10px",
+        label: {
+          color: "#FFFFFF",
+        },
+      },
+    },
+  },
+});
+
+export const yellowTheme = createTheme({
+  palette: {
+    mode: "dark",
+    primary: {
+      main: "#FFBA09",
+    },
+    background: {
+      default: "#1f1e1d",
+    },
+    text: {
+      primary: "#181715",
+      secondary: "#000",
+    },
+    light: {
+      main: "#FFFFFF",
+    },
+  },
+
+  MuiTextField: {
+    styleOverrides: {
+      root: {
+        borderRadius: "10px",
+        label: {
+          color: "#FFFFFF",
+        },
+      },
+    },
+  },
+});
+
+export const lightTheme = createTheme({
+  palette: {
+    mode: "light",
+    primary: {
+      main: "#7ca8eb",
+    },
+    background: {
+      default: "#cfd7e3",
+    },
+    text: {
+      primary: "#001e3c",
+    },
+    light: {
+      main: "#000",
+    },
+  },
+
+  MuiTextField: {
+    styleOverrides: {
+      root: {
+        borderRadius: "10px",
+        label: {
+          color: "#FFFFFF",
+        },
+      },
+    },
+  },
+});
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -20,9 +169,6 @@ function Navbar() {
 
   // Toggle Menu
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-
-  // Toggle Dark Mode
-  const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
 
   return (
     <AppBar
@@ -95,20 +241,6 @@ function Navbar() {
           >
             Editor
           </Button>
-        </Box>
-
-        {/* Dark Mode Toggle */}
-        <Box sx={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-          <IconButton
-            onClick={toggleDarkMode}
-            className="dark-mode-toggle"
-            sx={{
-              color: isDarkMode ? "#f9f9f9" : "#333",
-              transition: "background-color 0.3s ease", // .dark-mode-toggle inline
-            }}
-          >
-            {isDarkMode ? <Brightness7Icon /> : <Brightness4Icon />}
-          </IconButton>
         </Box>
       </Container>
     </AppBar>
