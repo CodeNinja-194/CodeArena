@@ -23,7 +23,9 @@ import "ace-builds/src-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/mode-c_cpp";
 import "ace-builds/src-noconflict/mode-java";
 import "ace-builds/src-noconflict/mode-python";
-import "ace-builds/src-noconflict/theme-chrome"; // Light theme for Ace Editor
+import "ace-builds/src-noconflict/theme-monokai"; 
+const editor = ace.edit("editor");
+editor.setTheme("ace/theme/monokai");  // Applying Monokai dark theme
 
 const Editor = () => {
   const [activeTab, setActiveTab] = useState(0);
