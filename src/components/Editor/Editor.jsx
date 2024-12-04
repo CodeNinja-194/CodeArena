@@ -193,25 +193,6 @@ int main() {
     }
   };
 
-  const handleClear = () => {
-    updateCode("");
-    setInput("");
-    const updatedFiles = [...files];
-    updatedFiles[activeTab].output = "";
-    setFiles(updatedFiles);
-  };
-
-  const handleDownloadCode = () => {
-    const languageArrayExtension = {
-      java: "java",
-      python3: "py",
-      cpp: "cpp",
-      javascript: "js",
-    };
-    const blob = new Blob([currentFile.code], { type: "text/plain;charset=utf-8" });
-    saveAs(blob, `code.${languageArrayExtension[currentFile.lang]}`);
-  };
-
   return (
     <Box
       sx={{
@@ -259,58 +240,17 @@ int main() {
             gap: 2,
             height: "calc(100vh - 48px)",
             overflowY: "auto",
-            backgroundColor: inputOutputBackground,
           }}
         >
-          <TextField
-            label="Input"
-            multiline
-            rows={4}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            sx={{ backgroundColor: textColor }}
-          />
-
-          <TextField
-            label="Output"
-            multiline
-            rows={8}
-            value={currentFile.output}
-            InputProps={{ readOnly: true }}
-            sx={{ backgroundColor: textColor }}
-          />
-
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <Button
-              startIcon={<PlayArrowRoundedIcon />}
-              onClick={createRequest}
-              disabled={executing}
-              variant="contained"
-            >
-              Run
-            </Button>
-            <Button
-              startIcon={<DownloadIcon />}
-              onClick={handleDownloadCode}
-              variant="outlined"
-            >
-              Download
-            </Button>
-            <Button
-              startIcon={<RefreshIcon />}
-              onClick={handleClear}
-              variant="outlined"
-            >
-              Clear
-            </Button>
-          </Box>
-
           <FormControl component="fieldset">
-            <FormLabel>Language</FormLabel>
+            <FormLabel component="legend" sx={{ color: textColor }}>
+              Language
+            </FormLabel>
             <RadioGroup
               row
               value={currentFile.lang}
               onChange={(e) => updateLanguage(e.target.value)}
+              sx={{ display: "flex", justifyContent: "space-evenly" }}
             >
               <FormControlLabel value="python3" control={<Radio />} label="Python" />
               <FormControlLabel value="cpp" control={<Radio />} label="C++" />
@@ -319,7 +259,35 @@ int main() {
             </RadioGroup>
           </FormControl>
 
-          {executing && <LinearProgress />}
+          <TextField
+            multiline
+            rows={5}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Enter input here"
+            variant="outlined"
+            style={{ backgroundColor: inputOutputBackground }}
+          />
+
+          <Button
+            onClick={createRequest}
+            startIcon={<PlayArrowRoundedIcon />}
+            variant="contained"
+            color="primary"
+          >
+            Run
+          </Button>
+
+          {executing && <LinearProgress color="secondary" />}
+          <TextField
+            multiline
+            rows={5}
+            value={currentFile.output}
+            InputProps={{ readOnly: true }}
+            placeholder="Output will appear here"
+            variant="outlined"
+            style={{ backgroundColor: inputOutputBackground }}
+          />
         </Box>
       </Box>
     </Box>
