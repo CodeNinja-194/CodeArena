@@ -269,39 +269,36 @@ int main() {
             overflowY: "auto",
           }}
         >
-          <FormControl component="fieldset">
+  
+ <FormControl component="fieldset">
   <FormLabel component="legend" sx={{ color: textColor }}>
     Language
   </FormLabel>
   <Box sx={{ display: "flex", justifyContent: "space-evenly", gap: "1rem" }}>
-    <Button
-      variant={currentFile.lang === "python3" ? "contained" : "outlined"}
+    <Chip
+      label="Python"
+      clickable
+      color={currentFile.lang === "python3" ? "primary" : "default"}
       onClick={() => updateLanguage("python3")}
-      sx={{ textTransform: "none" }}
-    >
-      Python
-    </Button>
-    <Button
-      variant={currentFile.lang === "cpp" ? "contained" : "outlined"}
+    />
+    <Chip
+      label="C++"
+      clickable
+      color={currentFile.lang === "cpp" ? "primary" : "default"}
       onClick={() => updateLanguage("cpp")}
-      sx={{ textTransform: "none" }}
-    >
-      C++
-    </Button>
-    <Button
-      variant={currentFile.lang === "java" ? "contained" : "outlined"}
+    />
+    <Chip
+      label="Java"
+      clickable
+      color={currentFile.lang === "java" ? "primary" : "default"}
       onClick={() => updateLanguage("java")}
-      sx={{ textTransform: "none" }}
-    >
-      Java
-    </Button>
-    <Button
-      variant={currentFile.lang === "javascript" ? "contained" : "outlined"}
+    />
+    <Chip
+      label="JavaScript"
+      clickable
+      color={currentFile.lang === "javascript" ? "primary" : "default"}
       onClick={() => updateLanguage("javascript")}
-      sx={{ textTransform: "none" }}
-    >
-      JavaScript
-    </Button>
+    />
   </Box>
 </FormControl>
           <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
