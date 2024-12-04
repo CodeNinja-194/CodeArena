@@ -270,22 +270,37 @@ int main() {
           }}
         >
       
-    <FormControl component="fieldset">
-      <FormLabel component="legend" sx={{ color: textColor }}>
-        Language
-      </FormLabel>
-      <Tabs
-        value={currentFile.lang}
-        onChange={(e, newValue) => updateLanguage(newValue)}
-        centered
-        sx={{ display: "flex", justifyContent: "center" }}
-      >
-        <Tab label="Python" value="python3" />
-        <Tab label="C++" value="cpp" />
-        <Tab label="Java" value="java" />
-        <Tab label="JavaScript" value="javascript" />
-      </Tabs>
-    </FormControl>
+   <FormControl component="fieldset">
+  <FormLabel component="legend" sx={{ color: textColor }}>
+    Language
+  </FormLabel>
+  <Box sx={{ display: "flex", justifyContent: "space-evenly", gap: "1rem" }}>
+    <IconButton
+      onClick={() => updateLanguage("python3")}
+      color={currentFile.lang === "python3" ? "primary" : "default"}
+    >
+      <PythonIcon />
+    </IconButton>
+    <IconButton
+      onClick={() => updateLanguage("cpp")}
+      color={currentFile.lang === "cpp" ? "primary" : "default"}
+    >
+      <CppIcon />
+    </IconButton>
+    <IconButton
+      onClick={() => updateLanguage("java")}
+      color={currentFile.lang === "java" ? "primary" : "default"}
+    >
+      <JavaIcon />
+    </IconButton>
+    <IconButton
+      onClick={() => updateLanguage("javascript")}
+      color={currentFile.lang === "javascript" ? "primary" : "default"}
+    >
+      <JavaScriptIcon />
+    </IconButton>
+  </Box>
+</FormControl>
           <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
             <Button
               variant="contained"
