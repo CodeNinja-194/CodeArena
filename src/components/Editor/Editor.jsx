@@ -269,38 +269,23 @@ int main() {
             overflowY: "auto",
           }}
         >
-  
- <FormControl component="fieldset">
-  <FormLabel component="legend" sx={{ color: textColor }}>
-    Language
-  </FormLabel>
-  <Box sx={{ display: "flex", justifyContent: "space-evenly", gap: "1rem" }}>
-    <Chip
-      label="Python"
-      clickable
-      color={currentFile.lang === "python3" ? "primary" : "default"}
-      onClick={() => updateLanguage("python3")}
-    />
-    <Chip
-      label="C++"
-      clickable
-      color={currentFile.lang === "cpp" ? "primary" : "default"}
-      onClick={() => updateLanguage("cpp")}
-    />
-    <Chip
-      label="Java"
-      clickable
-      color={currentFile.lang === "java" ? "primary" : "default"}
-      onClick={() => updateLanguage("java")}
-    />
-    <Chip
-      label="JavaScript"
-      clickable
-      color={currentFile.lang === "javascript" ? "primary" : "default"}
-      onClick={() => updateLanguage("javascript")}
-    />
-  </Box>
-</FormControl>
+      
+    <FormControl component="fieldset">
+      <FormLabel component="legend" sx={{ color: textColor }}>
+        Language
+      </FormLabel>
+      <Tabs
+        value={currentFile.lang}
+        onChange={(e, newValue) => updateLanguage(newValue)}
+        centered
+        sx={{ display: "flex", justifyContent: "center" }}
+      >
+        <Tab label="Python" value="python3" />
+        <Tab label="C++" value="cpp" />
+        <Tab label="Java" value="java" />
+        <Tab label="JavaScript" value="javascript" />
+      </Tabs>
+    </FormControl>
           <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
             <Button
               variant="contained"
