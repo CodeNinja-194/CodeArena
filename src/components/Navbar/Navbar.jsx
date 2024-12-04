@@ -34,7 +34,7 @@ function Navbar() {
         height: "48px",
         justifyContent: "center",
         color: isDarkMode ? "#f9f9f9" : "#333",
-        transition: "transform 0.3s ease-in-out",
+        transition: "transform 0.3s ease-in-out", // .menu-slide inline
       }}
     >
       <Container
@@ -104,7 +104,7 @@ function Navbar() {
             className="dark-mode-toggle"
             sx={{
               color: isDarkMode ? "#f9f9f9" : "#333",
-              transition: "background-color 0.3s ease",
+              transition: "background-color 0.3s ease", // .dark-mode-toggle inline
             }}
           >
             {isDarkMode ? <Brightness7Icon /> : <Brightness4Icon />}
