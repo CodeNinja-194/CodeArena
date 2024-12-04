@@ -47,7 +47,7 @@ const Editor = () => {
 
   const defaultFile = {
     lang: "python3",
-    code: print("Welcome to Codetantra"),
+    code: `print("Welcome to Codetantra")`,
     output: "",
   };
 
@@ -157,20 +157,20 @@ const Editor = () => {
   updatedFiles[activeTab].lang = newLang;
   updatedFiles[activeTab].code =
     newLang === "python3"
-      ? print("Welcome to Codetantra")
+      ? `print("Welcome to Codetantra")`
       : newLang === "java"
-      ? import java.util.*;
+      ? `import java.util.*;
 class Main {
     public static void main(String[] args) {
         System.out.println("Welcome to Codetantra");
     }
-}
-      : #include <iostream>
+}`
+      : `#include <iostream>
 using namespace std;
 int main() {
     cout << "Welcome to Codetantra";
     return 0;
-};
+}`;
   setFiles(updatedFiles);
 };
 
@@ -215,7 +215,7 @@ int main() {
       c: "c",
     };
     const blob = new Blob([currentFile.code], { type: "text/plain;charset=utf-8" });
-    saveAs(blob, code.${languageArrayExtension[currentFile.lang]});
+    saveAs(blob, `code.${languageArrayExtension[currentFile.lang]}`);
   };
 
   return (
@@ -232,7 +232,7 @@ int main() {
         {files.map((file, index) => (
           <Tab
             key={index}
-            label={File ${index + 1}}
+            label={`File ${index + 1}`}
             onDoubleClick={() => handleDeleteFile(index)}
           />
         ))}
@@ -245,7 +245,7 @@ int main() {
         <AceEditor
           mode={editorLang}
           theme="chrome"
-          name={editor-${activeTab}}
+          name={`editor-${activeTab}`}
           onChange={updateCode}
           value={currentFile.code}
           fontSize={16}
@@ -336,7 +336,7 @@ int main() {
               backgroundColor: inputOutputBackground,
               color: textColor,
               borderRadius: 1,
-              border: 1px solid #ccc,
+              border: `1px solid #ccc`,
             }}
           />
 
@@ -359,3 +359,5 @@ int main() {
     </Box>
   );
 };
+
+export default Editor;
