@@ -271,36 +271,21 @@ int main() {
         >
       
    <FormControl component="fieldset">
-  <FormLabel component="legend" sx={{ color: textColor }}>
-    Language
-  </FormLabel>
-  <Box sx={{ display: "flex", justifyContent: "space-evenly", gap: "1rem" }}>
-    <IconButton
-      onClick={() => updateLanguage("python3")}
-      color={currentFile.lang === "python3" ? "primary" : "default"}
-    >
-      <PythonIcon />
-    </IconButton>
-    <IconButton
-      onClick={() => updateLanguage("cpp")}
-      color={currentFile.lang === "cpp" ? "primary" : "default"}
-    >
-      <CppIcon />
-    </IconButton>
-    <IconButton
-      onClick={() => updateLanguage("java")}
-      color={currentFile.lang === "java" ? "primary" : "default"}
-    >
-      <JavaIcon />
-    </IconButton>
-    <IconButton
-      onClick={() => updateLanguage("javascript")}
-      color={currentFile.lang === "javascript" ? "primary" : "default"}
-    >
-      <JavaScriptIcon />
-    </IconButton>
-  </Box>
-</FormControl>
+            <FormLabel component="legend" sx={{ color: textColor }}>
+              Language
+            </FormLabel>
+            <RadioGroup
+            row
+            value={currentFile.lang}
+            onChange={(e) => updateLanguage(e.target.value)}
+            sx={{ display: "flex", justifyContent: "space-evenly" }}
+          >
+            <FormControlLabel value="python3" control={<Radio />} label="Python" />
+            <FormControlLabel value="cpp" control={<Radio />} label="C++" />
+            <FormControlLabel value="java" control={<Radio />} label="Java" />
+            <FormControlLabel value="javascript" control={<Radio />} label="JavaScript" />
+          </RadioGroup>
+          </FormControl>
           <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
             <Button
               variant="contained"
