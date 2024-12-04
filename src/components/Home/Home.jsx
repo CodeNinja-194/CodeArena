@@ -156,9 +156,10 @@ function Home() {
                 backgroundColor: isDarkMode ? "#3c3c3c" : "#ffffff",
                 boxShadow: "0 4px 16px rgba(0, 0, 0, 0.1)",
                 textAlign: "center",
-                transition: "transform 0.3s ease-in-out",
+                transition: "transform 0.3s ease, box-shadow 0.3s ease",
                 "&:hover": {
-                  transform: "scale(1.05)",
+                  transform: "translateY(-10px)",
+                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
                 },
               }}
             >
@@ -166,20 +167,23 @@ function Home() {
                 variant="h5"
                 sx={{
                   color: isDarkMode ? "#f9f9f9" : "#333",
-                  fontWeight: 600,
+                  fontWeight: 700,
+                  fontFamily: "Poppins, sans-serif",
                   marginBottom: "1rem",
                 }}
               >
-                Real-time Collaboration
+                Real-Time Collaboration
               </Typography>
               <Typography
+                variant="body1"
                 sx={{
                   color: isDarkMode ? "#dcdcdc" : "#555",
                   fontSize: "1rem",
+                  fontFamily: "Poppins, sans-serif",
                   lineHeight: 1.6,
                 }}
               >
-                Work together in real time on code with your team, making collaboration smooth.
+                Work with teammates in real-time. Share your code and see changes instantly.
               </Typography>
             </Box>
           </Grid>
@@ -193,9 +197,10 @@ function Home() {
                 backgroundColor: isDarkMode ? "#3c3c3c" : "#ffffff",
                 boxShadow: "0 4px 16px rgba(0, 0, 0, 0.1)",
                 textAlign: "center",
-                transition: "transform 0.3s ease-in-out",
+                transition: "transform 0.3s ease, box-shadow 0.3s ease",
                 "&:hover": {
-                  transform: "scale(1.05)",
+                  transform: "translateY(-10px)",
+                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.2)",
                 },
               }}
             >
@@ -203,20 +208,23 @@ function Home() {
                 variant="h5"
                 sx={{
                   color: isDarkMode ? "#f9f9f9" : "#333",
-                  fontWeight: 600,
+                  fontWeight: 700,
+                  fontFamily: "Poppins, sans-serif",
                   marginBottom: "1rem",
                 }}
               >
-                Live Code Preview
+                Multi-Language Support
               </Typography>
               <Typography
+                variant="body1"
                 sx={{
                   color: isDarkMode ? "#dcdcdc" : "#555",
                   fontSize: "1rem",
+                  fontFamily: "Poppins, sans-serif",
                   lineHeight: 1.6,
                 }}
               >
-                See changes instantly with live previews while you code.
+                Write and execute code in various languages, including Python, Java, and C++.
               </Typography>
             </Box>
           </Grid>
