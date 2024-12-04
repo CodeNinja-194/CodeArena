@@ -23,6 +23,7 @@ import "ace-builds/src-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/mode-c_cpp";
 import "ace-builds/src-noconflict/mode-java";
 import "ace-builds/src-noconflict/mode-python";
+import "ace-builds/src-noconflict/mode-javascript";
 import "ace-builds/src-noconflict/theme-chrome"; // Light theme for Ace Editor
 
 const Editor = () => {
@@ -40,9 +41,9 @@ const Editor = () => {
 
   const languageMap = {
     cpp: "c_cpp",
-    c: "c_cpp",
     java: "java",
     python3: "python",
+    javascript: "javascript",
   };
 
   const defaultFile = {
@@ -74,7 +75,7 @@ const Editor = () => {
     localStorage.setItem("input", input);
   }, [files, input]);
 
-  // Custom completer logic for Python, Java, and C++
+  // Custom completer logic for Python, Java, C++, and JavaScript
   useEffect(() => {
     const customCompleter = {
       getCompletions: (editor, session, pos, prefix, callback) => {
@@ -94,12 +95,19 @@ const Editor = () => {
           { caption: "#include", value: "#include <iostream>", meta: "Include library" },
           { caption: "int main", value: "int main() {\n\n    return 0;\n}", meta: "Main function" },
         ];
+        const javascriptCompletions = [
+          { caption: "console.log", value: "console.log();", meta: "Log to console" },
+          { caption: "function", value: "function name() {\n\n}", meta: "Function declaration" },
+          { caption: "if statement", value: "if (condition) {\n\n}", meta: "Condition block" },
+        ];
 
         const completions =
           editorLang === "python"
             ? pythonCompletions
             : editorLang === "java"
             ? javaCompletions
+            : editorLang === "javascript"
+            ? javascriptCompletions
             : cppCompletions;
 
         callback(null, completions);
@@ -108,22 +116,6 @@ const Editor = () => {
 
     ace.acequire("ace/ext/language_tools").addCompleter(customCompleter);
   }, [editorLang]);
-
-  // Handle Cmd + Enter or Ctrl + Enter to run code
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if ((event.key === "Enter" && (event.metaKey || event.ctrlKey))) {
-        event.preventDefault(); // Prevent default enter behavior
-        createRequest(); // Run code on Cmd+Enter or Ctrl+Enter
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [files, input, activeTab]);
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -153,26 +145,28 @@ const Editor = () => {
   };
 
   const updateLanguage = (newLang) => {
-  const updatedFiles = [...files];
-  updatedFiles[activeTab].lang = newLang;
-  updatedFiles[activeTab].code =
-    newLang === "python3"
-      ? `print("Welcome to Codetantra")`
-      : newLang === "java"
-      ? `import java.util.*;
+    const updatedFiles = [...files];
+    updatedFiles[activeTab].lang = newLang;
+    updatedFiles[activeTab].code =
+      newLang === "python3"
+        ? `print("Welcome to Codetantra")`
+        : newLang === "java"
+        ? `import java.util.*;
 class Main {
     public static void main(String[] args) {
         System.out.println("Welcome to Codetantra");
     }
 }`
-      : `#include <iostream>
+        : newLang === "javascript"
+        ? `console.log("Welcome to Codetantra");`
+        : `#include <iostream>
 using namespace std;
 int main() {
     cout << "Welcome to Codetantra";
     return 0;
 }`;
-  setFiles(updatedFiles);
-};
+    setFiles(updatedFiles);
+  };
 
   const createRequest = async () => {
     try {
@@ -212,7 +206,7 @@ int main() {
       java: "java",
       python3: "py",
       cpp: "cpp",
-      c: "c",
+      javascript: "js",
     };
     const blob = new Blob([currentFile.code], { type: "text/plain;charset=utf-8" });
     saveAs(blob, `code.${languageArrayExtension[currentFile.lang]}`);
@@ -265,95 +259,67 @@ int main() {
             gap: 2,
             height: "calc(100vh - 48px)",
             overflowY: "auto",
+            backgroundColor: inputOutputBackground,
           }}
         >
-          <FormControl component="fieldset">
-            <FormLabel component="legend" sx={{ color: textColor }}>
-              Language
-            </FormLabel>
-            <RadioGroup
-              row
-              value={currentFile.lang}
-              onChange={(e) => updateLanguage(e.target.value)}
-              sx={{ display: "flex", justifyContent: "space-evenly" }}
-            >
-              <FormControlLabel value="python3" control={<Radio />} label="Python" />
-              <FormControlLabel value="c" control={<Radio />} label="C" />
-              <FormControlLabel value="cpp" control={<Radio />} label="C++" />
-              <FormControlLabel value="java" control={<Radio />} label="Java" />
-            </RadioGroup>
-          </FormControl>
+          <TextField
+            label="Input"
+            multiline
+            rows={4}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            sx={{ backgroundColor: textColor }}
+          />
 
-          <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
+          <TextField
+            label="Output"
+            multiline
+            rows={8}
+            value={currentFile.output}
+            InputProps={{ readOnly: true }}
+            sx={{ backgroundColor: textColor }}
+          />
+
+          <Box sx={{ display: "flex", gap: 1 }}>
             <Button
-              variant="contained"
-              onClick={createRequest}
               startIcon={<PlayArrowRoundedIcon />}
+              onClick={createRequest}
               disabled={executing}
-              size="small"
-              sx={{
-                backgroundColor: "#4caf50",
-                "&:hover": { backgroundColor: "#388e3c" },
-              }}
+              variant="contained"
             >
               Run
             </Button>
             <Button
-              variant="contained"
-              onClick={handleClear}
-              startIcon={<RefreshIcon />}
-              size="small"
-              sx={{
-                backgroundColor: "#ff9800",
-                "&:hover": { backgroundColor: "#f57c00" },
-              }}
-            >
-              Clear
-            </Button>
-            <Button
-              variant="contained"
-              onClick={handleDownloadCode}
               startIcon={<DownloadIcon />}
-              size="small"
-              sx={{
-                backgroundColor: "#2196f3",
-                "&:hover": { backgroundColor: "#1976d2" },
-              }}
+              onClick={handleDownloadCode}
+              variant="outlined"
             >
               Download
             </Button>
+            <Button
+              startIcon={<RefreshIcon />}
+              onClick={handleClear}
+              variant="outlined"
+            >
+              Clear
+            </Button>
           </Box>
+
+          <FormControl component="fieldset">
+            <FormLabel>Language</FormLabel>
+            <RadioGroup
+              row
+              value={currentFile.lang}
+              onChange={(e) => updateLanguage(e.target.value)}
+            >
+              <FormControlLabel value="python3" control={<Radio />} label="Python" />
+              <FormControlLabel value="cpp" control={<Radio />} label="C++" />
+              <FormControlLabel value="javascript" control={<Radio />} label="JavaScript" />
+              <FormControlLabel value="java" control={<Radio />} label="Java" />
+            </RadioGroup>
+          </FormControl>
 
           {executing && <LinearProgress />}
-
-          <TextField
-            multiline
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            rows={5}
-            variant="outlined"
-            sx={{
-              backgroundColor: inputOutputBackground,
-              color: textColor,
-              borderRadius: 1,
-              border: `1px solid #ccc`,
-            }}
-          />
-
-          <Box
-            sx={{
-              flex: 1,
-              backgroundColor: "#f9f9f9",
-              padding: 2,
-              overflowY: "auto",
-              borderRadius: 1,
-              border: "1px solid #ccc",
-              whiteSpace: "pre-wrap",
-              color: textColor,
-            }}
-          >
-            {currentFile.output || "Output will appear here..."}
-          </Box>
         </Box>
       </Box>
     </Box>
