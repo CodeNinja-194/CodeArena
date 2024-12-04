@@ -3,13 +3,15 @@ import {
   Box,
   Button,
   FormControl,
+  FormControlLabel,
   FormLabel,
   LinearProgress,
+  Radio,
+  RadioGroup,
+  Tab,
+  Tabs,
   TextField,
   useTheme,
-  Select,
-  MenuItem,
-  InputLabel,
 } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/CloudDownload";
 import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
@@ -21,7 +23,6 @@ import "ace-builds/src-noconflict/ext-language_tools";
 import "ace-builds/src-noconflict/mode-c_cpp";
 import "ace-builds/src-noconflict/mode-java";
 import "ace-builds/src-noconflict/mode-python";
-import "ace-builds/src-noconflict/mode-javascript";
 import "ace-builds/src-noconflict/theme-chrome"; // Light theme for Ace Editor
 
 const Editor = () => {
@@ -39,8 +40,8 @@ const Editor = () => {
 
   const languageMap = {
     cpp: "c_cpp",
+    c: "c_cpp",
     java: "java",
-    javascript: "javascript",
     python3: "python",
   };
 
@@ -152,28 +153,26 @@ const Editor = () => {
   };
 
   const updateLanguage = (newLang) => {
-    const updatedFiles = [...files];
-    updatedFiles[activeTab].lang = newLang;
-    updatedFiles[activeTab].code =
-      newLang === "python3"
-        ? `print("Welcome to Codetantra")`
-        : newLang === "java"
-        ? `import java.util.*;
+  const updatedFiles = [...files];
+  updatedFiles[activeTab].lang = newLang;
+  updatedFiles[activeTab].code =
+    newLang === "python3"
+      ? `print("Welcome to Codetantra")`
+      : newLang === "java"
+      ? `import java.util.*;
 class Main {
     public static void main(String[] args) {
         System.out.println("Welcome to Codetantra");
     }
 }`
-        : newLang === "javascript"
-        ? `console.log("Welcome to Codetantra");`
-        : `#include <iostream>
+      : `#include <iostream>
 using namespace std;
 int main() {
     cout << "Welcome to Codetantra";
     return 0;
 }`;
-    setFiles(updatedFiles);
-  };
+  setFiles(updatedFiles);
+};
 
   const createRequest = async () => {
     try {
@@ -213,7 +212,7 @@ int main() {
       java: "java",
       python3: "py",
       cpp: "cpp",
-      javascript: "js",
+      c: "c",
     };
     const blob = new Blob([currentFile.code], { type: "text/plain;charset=utf-8" });
     saveAs(blob, `code.${languageArrayExtension[currentFile.lang]}`);
@@ -229,11 +228,18 @@ int main() {
         overflow: "hidden",
       }}
     >
-      <Box sx={{ display: "flex", justifyContent: "center", gap: 2, padding: 2 }}>
-        <Button variant="contained" onClick={createRequest} startIcon={<PlayArrowRoundedIcon />} disabled={executing} size="small">Run</Button>
-        <Button variant="contained" onClick={handleClear} startIcon={<RefreshIcon />} size="small">Clear</Button>
-        <Button variant="contained" onClick={handleDownloadCode} startIcon={<DownloadIcon />} size="small">Download</Button>
-      </Box>
+      <Tabs value={activeTab} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
+        {files.map((file, index) => (
+          <Tab
+            key={index}
+            label={`File ${index + 1}`}
+            onDoubleClick={() => handleDeleteFile(index)}
+          />
+        ))}
+        <Button onClick={handleAddFile} sx={{ minWidth: "2rem", color: "primary.main" }}>
+          +
+        </Button>
+      </Tabs>
 
       <Box sx={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: 2 }}>
         <AceEditor
@@ -252,27 +258,73 @@ int main() {
           }}
         />
 
-        <Box sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-          height: "calc(100vh - 48px)",
-          overflowY: "auto",
-        }}>
-          <FormControl>
-            <InputLabel>Language</InputLabel>
-            <Select
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            height: "calc(100vh - 48px)",
+            overflowY: "auto",
+          }}
+        >
+          <FormControl component="fieldset">
+            <FormLabel component="legend" sx={{ color: textColor }}>
+              Language
+            </FormLabel>
+            <RadioGroup
+              row
               value={currentFile.lang}
               onChange={(e) => updateLanguage(e.target.value)}
-              label="Language"
-              sx={{ marginBottom: 2 }}
+              sx={{ display: "flex", justifyContent: "space-evenly" }}
             >
-              <MenuItem value="python3">Python</MenuItem>
-              <MenuItem value="cpp">C++</MenuItem>
-              <MenuItem value="java">Java</MenuItem>
-              <MenuItem value="javascript">JavaScript</MenuItem>
-            </Select>
+              <FormControlLabel value="python3" control={<Radio />} label="Python" />
+              <FormControlLabel value="c" control={<Radio />} label="C" />
+              <FormControlLabel value="cpp" control={<Radio />} label="C++" />
+              <FormControlLabel value="java" control={<Radio />} label="Java" />
+            </RadioGroup>
           </FormControl>
+
+          <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
+            <Button
+              variant="contained"
+              onClick={createRequest}
+              startIcon={<PlayArrowRoundedIcon />}
+              disabled={executing}
+              size="small"
+              sx={{
+                backgroundColor: "#4caf50",
+                "&:hover": { backgroundColor: "#388e3c" },
+              }}
+            >
+              Run
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleClear}
+              startIcon={<RefreshIcon />}
+              size="small"
+              sx={{
+                backgroundColor: "#ff9800",
+                "&:hover": { backgroundColor: "#f57c00" },
+              }}
+            >
+              Clear
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleDownloadCode}
+              startIcon={<DownloadIcon />}
+              size="small"
+              sx={{
+                backgroundColor: "#2196f3",
+                "&:hover": { backgroundColor: "#1976d2" },
+              }}
+            >
+              Download
+            </Button>
+          </Box>
+
+          {executing && <LinearProgress />}
 
           <TextField
             multiline
