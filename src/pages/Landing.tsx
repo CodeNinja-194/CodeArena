@@ -1,12 +1,12 @@
 import { A } from '@solidjs/router';
 import Navbar from '../ui/Navbar';
-import { 
-  Zap, 
-  Code2, 
-  Play, 
-  Layers, 
-  ArrowRight, 
-  Github, 
+import {
+  Zap,
+  Code2,
+  Play,
+  Layers,
+  ArrowRight,
+  Github,
   Terminal,
   Cpu,
   Globe,
@@ -105,7 +105,7 @@ const Landing = () => {
       {/* Background System */}
       <div class="mesh-bg" />
       <div class="noise" />
-      
+
       {/* Navbar */}
       <Navbar />
 
@@ -118,14 +118,14 @@ const Landing = () => {
         >
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-blue/10 text-accent-blue text-[11px] font-bold tracking-widest uppercase mb-8">
             <Sparkles class="w-3 h-3" />
-            <span>Now with Multi-Core Visualization</span>
+            <span>Now with Multi-Core Visualization & Premium Online Compiler</span>
           </div>
-          
+
           <h1 class="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight leading-[1.05] mb-8">
-            Premium Online<br />
-            <span class="text-accent-gradient">Code Compiler.</span>
+            Code, Compile, Execute <br />
+            <span class="text-accent-gradient">and Visualize.</span>
           </h1>
-          
+
           <p class="text-lg md:text-xl text-brand-secondary max-w-2xl mx-auto mb-10 leading-relaxed">
             Innovative online compiler with multi-language support, beautiful themes, and powerful features.
           </p>
@@ -151,11 +151,11 @@ const Landing = () => {
         >
           {/* Enhanced Glow Effect */}
           <div class="absolute -inset-10 bg-accent-blue/20 blur-[120px] opacity-40 rounded-[5rem] transition-all duration-700 group-hover:bg-accent-purple/20 group-hover:blur-[150px]" />
-          
+
           <div class="relative rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl bg-[#0b0e14] backdrop-blur-2xl transition-transform duration-700 hover:scale-[1.02] hover:-rotate-1">
             {/* Glossy Overlay */}
             <div class="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
-            
+
             {/* Terminal Header */}
             <div class="flex items-center justify-between px-8 py-5 border-b border-white/5 bg-white/5 backdrop-blur-md">
               <div class="flex gap-2.5">
@@ -169,7 +169,7 @@ const Landing = () => {
               </div>
               <div class="w-16 h-1 bg-transparent" />
             </div>
-            
+
             <div class="p-10 md:p-14 text-left font-mono text-sm md:text-base leading-[1.8] overflow-x-auto relative bg-[#0b0e14]">
               <div class="flex gap-8 mb-4 animate-in fade-in slide-in-from-left-4 duration-500 delay-100">
                 <span class="text-white/20 select-none text-right w-6 font-bold">1</span>
@@ -191,7 +191,7 @@ const Landing = () => {
                 <span class="text-white/20 select-none text-right w-6 font-bold">5</span>
                 <span><span class="text-[#60a5fa]">print</span><span class="text-white/80">(</span><span class="text-white">calculate_flow</span><span class="text-white/80">([</span><span class="text-[#34d399]">1, 2, 3, 4, 5</span><span class="text-white/80">]))</span></span>
               </div>
-              
+
               {/* Execution Matrix - Floating Glass Card */}
               <div class="mt-16 p-8 rounded-[2rem] bg-white/[0.03] border border-white/10 backdrop-blur-xl relative group-hover:bg-white/[0.05] transition-all duration-500 shadow-2xl overflow-hidden">
                 <div class="absolute inset-0 bg-gradient-to-r from-accent-blue/5 to-transparent opacity-50" />
@@ -214,7 +214,7 @@ const Landing = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* Internal Shadow for Depth */}
             <div class="absolute inset-0 shadow-[inset_0_0_100px_rgba(0,0,0,0.5)] pointer-events-none" />
           </div>
@@ -267,11 +267,11 @@ const Landing = () => {
                     {l.icon}
                   </div>
                   <div class="w-full">
-                     <h3 class="text-2xl font-bold text-foreground mb-3 flex items-center justify-between">
-                       {l.name}
-                       <ArrowRight class="w-5 h-5 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-brand-secondary" />
-                     </h3>
-                     <span class="inline-flex text-xs font-mono font-bold text-brand-secondary bg-bg-tertiary px-4 py-1.5 rounded-full border border-border group-hover:border-foreground/20 transition-colors uppercase tracking-widest">{l.ext}</span>
+                    <h3 class="text-2xl font-bold text-foreground mb-3 flex items-center justify-between">
+                      {l.name}
+                      <ArrowRight class="w-5 h-5 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-brand-secondary" />
+                    </h3>
+                    <span class="inline-flex text-xs font-mono font-bold text-brand-secondary bg-bg-tertiary px-4 py-1.5 rounded-full border border-border group-hover:border-foreground/20 transition-colors uppercase tracking-widest">{l.ext}</span>
                   </div>
                 </div>
               </div>
@@ -313,34 +313,35 @@ const Landing = () => {
                 <span class="text-xs font-bold text-emerald-500 uppercase tracking-widest">All Systems Operational</span>
               </div>
             </div>
-            
+
             <div class="md:col-span-2 md:col-start-7">
               <h4 class="font-bold mb-6 tracking-tight">Platform</h4>
               <div class="flex flex-col gap-4 text-sm text-brand-secondary font-medium">
-                <A href="#" class="hover:text-foreground transition-colors">Challenges</A>
-                <A href="#" class="hover:text-foreground transition-colors">Mastery Track</A>
-                <A href="#" class="hover:text-foreground transition-colors">Creator Portfolio</A>
+                <A href="/about" class="hover:text-foreground transition-colors">About</A>
+                <A href="/editor" class="hover:text-foreground transition-colors">Editor</A>
+                <A href="/visualize" class="hover:text-foreground transition-colors">Visualise</A>
+
               </div>
             </div>
 
             <div class="md:col-span-2">
               <h4 class="font-bold mb-6 tracking-tight">Resources</h4>
               <div class="flex flex-col gap-4 text-sm text-brand-secondary font-medium">
-                <A href="#" class="hover:text-foreground transition-colors">DSA Roadmap</A>
+                <A href="https://whimsical.com/dsa-roadmap-JegsSL6nFr1b3V25bRzpYA" class="hover:text-foreground transition-colors">DSA Roadmap</A>
               </div>
             </div>
 
             <div class="md:col-span-2">
               <h4 class="font-bold mb-6 tracking-tight">Contact</h4>
               <div class="flex flex-col gap-4 text-sm text-brand-secondary font-medium">
-                <a href="#" class="hover:text-foreground transition-colors">Email Me</a>
+                <a href="mailto:[EMAIL_ADDRESS]" class="hover:text-foreground transition-colors">Email Me</a>
                 <a href="#" class="hover:text-foreground transition-colors">Report Bug</a>
               </div>
             </div>
           </div>
 
           <div class="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-border/50 gap-4 text-sm font-medium text-brand-secondary">
-            <p>© 2026 CodeNinja-194. Designed with ❤️ for the global community.</p>
+            <p>© 2026 CodeNinja-194. Designed with ❤️ for the community.</p>
           </div>
         </div>
       </footer>

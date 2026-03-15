@@ -28,3 +28,22 @@ Recommended Additions for a $100M Standard Application:
 
 8. Comprehensive SEO & Analytics
    - Ensure SEO optimization by adding dynamic meta tags per page. Add PostHog or Vercel Analytics to accurately track user engagement, error rates, and most utilized languages in the compiler.
+
+### 🎨 Theme Specifications
+The CodeArena project utilizes a custom, high-end **Vercel-inspired design system** with native support for both Light and Dark modes.
+
+1. **Design Principle**: Modern Minimalism & Glassmorphism.
+2. **Color Palette (Dark Mode)**:
+   - UI Background: Slate-950 (#020617)
+   - Surface Elements: Slate-900 (#0f172a)
+   - Accent: Vercel Blue (#0070f3)
+3. **Color Palette (Light Mode)**:
+   - UI Background: Slate-50 (#f8fafc)
+   - Surface Elements: Pure White (#ffffff)
+4. **Editor Theme Integration**:
+   - **Dark**: vs-dark (native Monaco)
+   - **Light**: github-light (custom high-contrast)
+5. **Interactive Elements**:
+   - Animated Glow backdrops.
+   - Bento-grid layout for feature showcase.
+   - Smooth transitions (500ms) for theme switching.
